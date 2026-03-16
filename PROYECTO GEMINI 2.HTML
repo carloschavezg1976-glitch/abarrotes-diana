@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abarrotes Diana | Gestor Maestro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f8fafc; 
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 1.25rem;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .qty-box {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .qty-btn {
+            padding: 0.6rem 1.2rem;
+            font-weight: 800;
+            font-size: 1.25rem;
+        }
+        .qty-btn:active { background: #cbd5e1; }
+        .qty-btn-plus { background-color: #2563eb; color: white; }
+
+        .category-pill {
+            white-space: nowrap;
+            padding: 0.6rem 1.4rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 1.5px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+        }
+        .category-pill.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid #e2e8f0;
+            z-index: 100;
+            padding: 1rem 1.5rem;
+        }
+
+        .search-container-bottom {
+            background: #f1f5f9;
+            border-radius: 1.25rem;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .brand-logo-container {
+            width: 56px;
+            height: 56px;
+            background: #2563eb;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .brand-logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .logo-hint {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            font-size: 7px;
+            text-align: center;
+            padding: 2px 0;
+            font-weight: 800;
+            opacity: 0;
+        }
+        .brand-logo-container:hover .logo-hint { opacity: 1; }
+    </style>
+</head>
+<body class="pb-64 md:pb-48">
+
+    <header class="bg-white/80 backdrop-blur-md px-6 py-4 border-b border-slate-100 sticky top-0 z-40">
+        <div class="max-w-[1400px] mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="brand-logo-container" id="logo-trigger" title="Haz clic para subir tu logo">
+                    <img id="main-logo-img" src="" class="hidden">
+                    <div id="logo-placeholder" class="text-white flex flex-col items-center">
+                        <svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                            <path d="M3 6h18"></path>
+                            <text x="7" y="19" font-family="Arial" font-size="7" font-weight="900" fill="white" stroke="none">AD</text>
+                        </svg>
+                    </div>
+                    <div class="logo-hint uppercase">Cambiar</div>
+                    <input type="file" id="logo-input" accept="image/*" class="hidden">
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold text-slate-900 leading-none">Abarrotes Diana</h1>
+                    <p class="text-[10px] text-blue-600 font-bold uppercase tracking-[0.15em] mt-1.5">Catálogo Maestro Consolidado</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="btn-add-manual" class="bg-slate-900 text-white p-3 rounded-2xl flex items-center gap-2 hover:bg-slate-800 active:scale-95 transition-transform">
+                    <i data-lucide="plus" class="w-5 h-5"></i>
+                    <span class="text-[11px] font-black uppercase hidden md:inline tracking-wider">Nuevo Producto</span>
+                </button>
+                <div class="bg-blue-50 text-blue-700 px-4 py-2.5 rounded-2xl text-[11px] font-black uppercase hidden sm:block">
+                    Total: <span id="catalog-count" class="text-blue-900 font-black">0</span> Items
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1400px] mx-auto p-6">
+        <!-- Filtros Dinámicos -->
+        <div id="category-list" class="flex gap-3 overflow-x-auto pb-6 no-scrollbar"></div>
+
+        <!-- Productos (UNA SOLA COLUMNA) -->
+        <div id="product-grid" class="grid grid-cols-1 gap-4">
+            <div class="col-span-full py-20 text-center text-slate-300 italic font-bold">
+                Sincronizando el catálogo maestro completo...
+            </div>
+        </div>
+    </main>
+
+    <!-- Barra de Control Inferior -->
+    <div class="bottom-bar">
+        <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <div class="md:col-span-3 flex items-center gap-8 justify-between md:justify-start">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Inversión Carga</span>
+                    <span id="total-display" class="text-2xl font-black text-blue-600 leading-none">$0.00</span>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Items Totales</span>
+                    <span id="items-count" class="text-2xl font-black text-slate-900 leading-none">0</span>
+                </div>
+            </div>
+          <div class="md:col-span-5">
+  <div class="search-container-bottom flex items-center gap-2 px-4 py-3">
+
+    <!-- ✅ Proveedor -->
+    <select id="provider-select"
+      class="px-3 py-2 bg-white border border-slate-200 rounded-xl font-black text-[11px] uppercase">
+      <option value="">Selecciona proveedor</option>
+      <option>Abarrotes El Duero</option>
+      <option>Abarrotera Z</option>
+      <option>Disper</option>
+    </select>
+
+    <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+
+    <input id="search-input"
+      type="text"
+      placeholder="Buscar producto…"
+      class="flex-1 outline-none text-slate-700 font-bold bg-transparent text-sm" />
+
+    <button id="btn-search"
+      class="px-4 py-2 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase">
+      Ir
+    </button>
+
+  </div>
+</div>
+            <div class="md:col-span-4 flex items-center gap-3">
+<button id="btn-new-order"
+  class="flex-1 px-4 py-4 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase shadow-xl">
+  Nuevo Pedido
+</button>
+                <button id="btn-ticket" class="flex-1 px-4 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-[11px] uppercase border border-slate-200 disabled:opacity-30" disabled>Reporte</button>
+               <button id="btn-save-order"
+  class="flex-[1.5] px-6 py-4 bg-green-600 text-white rounded-2xl font-black text-[11px] uppercase shadow-xl disabled:opacity-30"
+  disabled>
+  Guardar Pedido
+</button>
+ <button id="btn-whatsapp"
+  onclick="sendWhatsApp()"
+  class="flex-[1.5] px-6 py-4 bg-blue-600 text-white rounded-2xl font-black text-[11px] uppercase shadow-2xl shadow-blue-200">
+  WhatsApp
+</button>
+        <a href="https://wa.me/?text=PRUEBA%20DE%20WHATSAPP"
+   target="_blank"
+   style="display:block;margin-top:10px;color:blue;font-weight:bold;">
+   👉 PROBAR WHATSAPP DIRECTO
+</a>    </div>
+        </div>
+    </div>
+
+    <!-- Modal para Nuevo Producto -->
+    <div id="modal-manual" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[150] flex items-center justify-center hidden p-4">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm fade-in text-center">
+            <h3 class="font-black text-slate-900 text-xl tracking-tight mb-2">Agregar Producto</h3>
+            <p class="text-[11px] text-slate-400 font-bold uppercase mb-6">Persistencia Permanente</p>
+            <div class="space-y-4 text-left">
+                <div>
+
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Nombre</label>
+                    <input id="manual-name" type="text" placeholder="Ej. Huevo San Juan" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Categoría</label>
+                        <input id="manual-cat" type="text" list="cat-options" placeholder="Seleccionar..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none">
+                        <datalist id="cat-options"></datalist>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Costo $</label>
+                        <input id="manual-price" type="number" placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none">
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-3 mt-8">
+                <button id="btn-save-manual" class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">Guardar en Catálogo</button>
+                <button id="btn-cancel-manual" class="w-full py-4 text-slate-400 font-bold text-xs uppercase">Regresar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Reporte -->
+    <div id="ticket-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[110] flex items-center justify-center hidden p-4">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md max-h-[85vh] overflow-y-auto font-mono">
+            <div class="text-center border-b-2 border-dashed border-slate-100 pb-6 mb-6">
+                <h2 class="text-2xl font-black uppercase text-blue-900 italic">ABARROTES DIANA</h2>
+                <p id="ticket-date" class="text-[10px] mt-2 text-slate-300"></p>
+            </div>
+            <div id="ticket-items" class="text-[13px] space-y-3 mb-8"></div>
+            <div class="flex justify-between items-center font-black text-xl text-slate-900 border-t-2 border-dashed border-slate-100 pt-6">
+                <span>TOTAL:</span>
+                <span id="ticket-total" class="text-blue-600"></span>
+            </div>
+            <button id="btn-close-ticket" class="mt-8 w-full py-6 bg-slate-900 text-white rounded-3xl font-black text-xs uppercase">Cerrar</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- BASE DE DATOS MAESTRA ACTUAL (450+ ARTÍCULOS) ---
+        const rawData = `AC NUTRIOLI DE SOYA 12/850ML|CJ|Aceites|442.84
+AC NUTRIOLI DE SOYA 12/400ML|CJ|Aceites|228.20
+AC NUTRIOLI DE SOYA 12/800ML|CJ|Aceites|412.42
+AC CRISTAL VEGETAL 12/1LT|CJ|Aceites|450.89
+AC CAPULLO 100% CANOLA 12/750ML|CJ|Aceites|475.48
+AC CAPULLO CANOLA 12/400ML|CJ|Aceites|279.81
+AC OLIVA OLI 12/500ML|CJ|Aceites|1105.00
+AC EL PARAISO 12/850ML|CJ|Aceites|385.00
+ACEITE 123 12/1LT|CJ|Aceites|415.00
+ACEITE AVE 12/850ML|CJ|Aceites|398.00
+ACEITE CARTAGENA 12/850ML|CJ|Aceites|365.00
+ACEITE KOCINERO 12/850ML|CJ|Aceites|382.00
+ACEITE MAZOLA 12/850ML|CJ|Aceites|455.00
+ACEITE NUTRIOLI 12/850ML|CJ|Aceites|442.84
+ACEITE PATRONA 12/500ML|CJ|Aceites|245.00
+ACEITE PREMIER 12/850ML|CJ|Aceites|390.00
+ACEITE PURO DE SOYA 12/850ML|CJ|Aceites|375.00
+ACEITE VEGETAL 12/850ML|CJ|Aceites|360.00
+ACEITE SABROSANO 850ML|CJ|Aceites|38.50
+LCH POLV NIDO KINDER 1 12/800GR|CJ|Bebes|1653.22
+LCH POLV NIDO KINDER 1 12/800GR (EX)|CJ|Bebes|1390.22
+LCH POLV NIDO KINDER 1 12/800GR (ST)|CJ|Bebes|1618.35
+INF LCH NAN 3 OPTIMALPRO 12/360GR|CJ|Bebes|1404.84
+TE MCCORMICK MANZANILLA 24/25PZ|CJ|Bebidas|387.94
+TE MCCORMICK VERDE 24/25PZ|CJ|Bebidas|781.91
+JUG JUMEX UNICO FRESCO ARANDANO 12/960ML|CJ|Bebidas|345.59
+JUG UNICO FRESCO NARAN S/PULPA 12/960ML|CJ|Bebidas|446.83
+JUG UNICO FRESCO NARAN C/PULPA 12/960ML|CJ|Bebidas|446.83
+CAF NESCAFE CAFE DE OLLA 12/170G|CJ|Despensa|358.85
+CAF NESCAFE DECAF DAWN 12/120GR|CJ|Despensa|1405.17
+CAF CRE COFFEE MATE ORIGINAL 12/311GR|CJ|Despensa|604.89
+HAR PASTEL B/CROCKER CHOC FUDGE 12/375GR|CJ|Despensa|554.80
+FLAN PRONTO VAINILLA C/CARAMELO 24/135GR|CJ|Despensa|330.79
+GEL PRONTO AGUA PIÑA 24/84GR|CJ|Despensa|276.03
+CP ATO MAIZENA ECON 160GR|PZA|Despensa|20.48
+CP ATO MAIZENA CHOCOLATE 24/47GR|CJ|Despensa|263.41
+SOP PT LA MODERNA SPAGHETTI 20/200GR|CJ|Sopas|149.48
+SOP PT LA MODERNA FIDEO #1 20/200GR|CJ|Sopas|149.48
+SOP PT LA MODERNA LETRA 20/200GR|CJ|Sopas|149.48
+SOP SP MARUCHAN CAMAR/LIM/HABANE 12/64GR|CJ|Sopas|150.00
+CER ZUCARITAS 21/380GR|CJ|Cereales|1083.68
+CER CHOCO KRISPIS 28/290GR|CJ|Cereales|990.31
+CER AVENA 3 MINUTOS 36/288GR|CJ|Cereales|624.10
+GALL GAMESA CREMAX NIEVE FRESA 8/213GR|CJ|Galletas|185.15
+GALL MARIBEL ANIMALITOS 6/800GR|CJ|Galletas|258.10
+GALL GAMESA SALADITAS 20/140GR|CJ|Galletas|321.36
+GALL OREO SLUG 12/189GR|CJ|Galletas|288.73
+PN BB TIPS T5 4/40PZ|CJ|Bebes|768.66
+PN BB TIPS T7 4/40PZ|CJ|Bebes|803.37
+PN HUGGIES ALL AROUND E-6 4/40PZ|CJ|Bebes|1123.35
+DET ROMA 10/2KG|CJ|Limpieza|759.31
+DET ARIEL REGULAR 10/850GR|CJ|Limpieza|370.78
+DET ACE REGULAR 10/850GR|CJ|Limpieza|330.18
+DET SALVO MULTIUSOS 10/900GR|CJ|Limpieza|335.29
+DET BLANCA NIEVES 10/1KG|CJ|Limpieza|363.30
+DET FOCA 40/250GR|CJ|Limpieza|380.14
+JABON ZOTE BLANCO 400G|CJ|Limpieza|21.00
+JABON ZOTE ROSA 400G|CJ|Limpieza|21.00
+BLANQ CLORALEX 950ML|CJ|Limpieza|15.50
+BLANQ CLORALEX REND 6/3.75LT|CJ|Limpieza|279.30
+LP FABULOSO MAR FRESCO 12/1LT|CJ|Limpieza|295.54
+LP PINOL AROMAS FLORAL 12/1LT|CJ|Limpieza|276.62
+SV DOWNY INTENSE EXOTICO 6/2.8LT|CJ|Limpieza|542.06
+LT LIQ SALVO LIMON 12/750ML|CJ|Limpieza|504.51
+CB PD COLGATE MFP 72/90ML|CJ|Higiene|1882.43
+TF KOTEX ANATOMICA C/A 10/10PZ|CJ|Higiene|145.43
+HIG VOGUE 600HD 10/4ROLL|CJ|Higiene|326.69
+HIG PETALO ULTRA RESIST 10/4ROLL|CJ|Higiene|260.09
+SSA VALENTINA NEGRA 24/370ML|CJ|Salsas|369.47
+SSA CATSUP EMBASA TETRA 12/KG|CJ|Salsas|283.22
+SSA MAGGI JUGO SAZONADOR 12/100ML|CJ|Salsas|444.84
+MAY MCCORMICK J/LIMON #16 12/390GR|CJ|Salsas|542.91
+VNG CLEMENTE JACQUES BLANCO 12/LT|CJ|Salsas|149.37
+SAL CISNE C/FLUOR BOLSA 20/KG|CJ|Salsas|345.91
+INS RAID CASA Y JARDIN 12/400ML|CJ|Otros|760.00
+VEL PROFINA ECO FAROLITO 12PZ|CJ|Otros|573.77
+DES CHAROLA #855 JAGUAR 10/50PZ|CJ|Desechables|166.95
+EMP ALUMINIO ALUMEX 12/50M|CJ|Desechables|305.86
+MOLE DOÑA MARIA VASO 24/235GR|CJ|Salsas|907.72
+ARROZ SOS SUPER EXTRA 1KG|CJ|Despensa|25.00
+AZUCAR MORENA SULKA 1KG|CJ|Despensa|28.00
+HUEVO BLANCO EL CALVARIO 30PZ|CJ|Despensa|82.00
+PAN BLANCO BIMBO GRANDE|CJ|Despensa|45.00
+PAN MOLIDO BIMBO 175G|CJ|Despensa|22.00
+HARINA TRIGO LA FUENTE 1KG|CJ|Despensa|14.00
+MANTECA VEGETAL INCA 500G|CJ|Despensa|28.00
+PILAS DURACELL AA 2PZ|CJ|Otros|45.00
+AZUCAR GLASS 500GR|CJ|Despensa|22.00
+CANELA ENTERA 50GR|CJ|Despensa|18.50
+CHILE ANCHO 100GR|CJ|Despensa|35.00
+CHILE GUAJILLO 100GR|CJ|Despensa|28.00
+CHOCOLATE IBARRA 6TAB|CJ|Despensa|75.00
+CLAVO DE OLOR 25GR|CJ|Despensa|12.00
+COCO RAYADO 100GR|CJ|Despensa|15.00
+COMINO ENTERO 25GR|CJ|Despensa|10.50
+FECULA DE MAIZ MAIZENA 400GR|CJ|Despensa|32.00
+FRIJOL BAYO ISADORA POUCH 430GR|CJ|Despensa|21.50
+GARBANZO SECO 500GR|CJ|Despensa|24.00
+HARINA HOT CAKES GAMESA 850GR|CJ|Despensa|38.00
+JAMAICA SECA 100GR|CJ|Despensa|32.00
+LENTEJA GRANDE 500GR|CJ|Despensa|22.00
+MAIZ PALOMERO 500GR|CJ|Despensa|18.00
+PIMIENTA ENTERA 25GR|CJ|Despensa|9.50
+SAL GRUESA 1KG|CJ|Salsas|12.00
+VAINILLA LIQUIDA 250ML|CJ|Despensa|18.00
+CAF NESCAFE CLASICO 42GR|CJ|Despensa|26.00
+JABON LIRIO BLANCO 150GR|CJ|Higiene|16.00
+CHOCOLATE ABUELITA 250G|CJ|Despensa|45.00
+CONSOME POLLO KNORR 8 CUBOS|CJ|Despensa|12.50
+AVENA QUAKER INSTANTANEA 400G|CJ|Despensa|32.00
+PAN TOSTADO BIMBO CLASICO 210G|CJ|Despensa|38.00
+MERMELADA MCCORMICK ZARZAMORA 270G|CJ|Despensa|42.00
+ATUN HERDEZ EN AGUA 130G|CJ|Despensa|19.50
+FRIJOL PERUANO VERDE VALLE 1KG|CJ|Despensa|48.00
+ARROZ INTEGRAL VERDE VALLE 1KG|CJ|Despensa|35.00
+JABON ESCUDO ORIGINAL 150G|CJ|Higiene|18.00
+SHAMPOO CAPRICE MANZANILLA 750ML|CJ|Higiene|38.00
+DESODORANTE SPEED STICK 50G|CJ|Higiene|28.00
+CEPILLO DENTAL COLGATE PREMIER|CJ|Higiene|15.00
+TOALLA SABA INVISIBLE C/ALAS 10PZ|CJ|Higiene|32.00
+LCH ALPURA CLASICA 1LT|PZA|Despensa|26.50
+REF COCA COLA 600ML|PZA|Bebidas|18.00
+PAN BLANCO BIMBO CHICO|PZA|Despensa|38.00
+JABON PALMOLIVE NATURALS 120G|PZA|Higiene|16.50
+SERVILLETAS ELITE 100PZ|PZA|Higiene|21.00
+DETERGENTE PERSIL 900G|PZA|Limpieza|42.00
+GALLETAS EMPERADOR CHOC 273G|PZA|Galletas|22.00
+JUGO DEL VALLE NARANJA 1LT|PZA|Bebidas|24.50
+CHILE CHIPOTLE HERDEZ 220G|PZA|Salsas|15.50
+SOPA CODO MODERNA #2 200G|PZA|Sopas|10.50
+ARROZ MORELOS EXTRA 900G|PZA|Despensa|31.00
+CAFÉ LEGAL DE OLLA 180G|PZA|Despensa|65.00
+MAYONESA HELLMANNS 190G|PZA|Salsas|24.00
+PAN DULCE NITO BIMBO 62G|PZA|Despensa|16.00
+BOTANA SABRITAS SAL 42G|PZA|Otros|18.00
+AGUA CIEL 1LT|PZA|Bebidas|12.00
+SHAMPOO PANTENE RESTAURACION 700ML|PZA|Higiene|95.00
+RASTRILLO GILLETTE PRESTOBARBA 1PZ|PZA|Higiene|14.00
+PAPEL HIG REGIO AIRE FRESCO 4R|PZA|Higiene|28.50
+VELADORA LUZ DIVINA #20|PZA|Otros|45.00
+DETERGENTE ARIEL LIQUIDO 1LT|PZA|Limpieza|58.00
+MAYONESA MCCORMICK LIMON 390G|PZA|Salsas|55.00
+GALLETAS CHOKIS CLASSIC 190G|PZA|Galletas|24.00
+BEBIDA TANG JAMAICA 15G|PZA|Bebidas|5.00
+BEBIDA ZUCKO PIÑA 15G|PZA|Bebidas|5.00
+MERMELADA HERDEZ FRESA 270G|PZA|Despensa|34.00
+SALSA CASERA HERDEZ 210G|PZA|Salsas|12.50
+CONSOME KNORR SUIZA 100G|PZA|Despensa|24.00
+CHOCOLATE KINDER DELICE 39G|PZA|Otros|16.00
+GALLETAS ANIMALITOS GAMESA 200G|PZA|Galletas|14.50
+PASTA DIENTES COLGATE LUMINOS 75ML|PZA|Higiene|42.00
+GEL CABELLO EGO BLACK 200G|PZA|Higiene|22.00
+CEPILLO DENTAL ORAL-B INDICATOR|PZA|Higiene|18.00
+JABON LIQUIDO AXION LIMON 640ML|PZA|Limpieza|48.00
+CLORO LOS PATOS 1LT|PZA|Limpieza|14.00	
+HUEVO SAN JUAN 30PZ|PZA|Despensa|85.00
+PAN DULCE ARTESANAL|PZA|Despensa|12.00
+CARGA GAS LP 20KG|PZA|Otros|420.00
+BEBIDA ENERGIZANTE MONSTER|PZA|Bebidas|45.00
+CERVEZA VICTORIA 473ML|PZA|Bebidas|22.00
+QUESO PANELA LA VILLITA 400G|PZA|Lácteos|68.00
+JAMON PAVO ZWAN 250G|PZA|Lácteos|52.00
+SHAMPOO HEAD & SHOULDERS 375ML|PZA|Higiene|65.00
+PAÑAL HUGGIES ETAPA 4 40PZ|PZA|Bebes|285.00
+TALCO JOHNSONS 200G|PZA|Bebes|48.00
+BIBERON EVENFLO 8OZ|PZA|Bebes|65.00
+SALCHICHA FUD CAMPESINA 500G|PZA|Lácteos|42.00
+ACEITUNAS BÚFALO 180G|PZA|Salsas|24.00
+ALIMENTO PARA PERRO DOG CHOW 2KG|PZA|Otros|185.00
+ENSALADA VERDURAS HERDEZ 200G|PZA|Salsas|14.50
+GELATINA D'GARI FRESA|PZA|Despensa|11.00
+SUAVIZANTE ENSUEÑO 850ML|PZA|Limpieza|22.00
+TOSTADAS MILPA REAL 360G|PZA|Despensa|34.00
+CREMA DENTAL SENSODYNE 100G|PZA|Higiene|85.00
+TOALLITAS HUMEDAS HUGGIES 80PZ|PZA|Bebes|45.00
+YOGHURT LALA FRESA 1LT|PZA|Lácteos|32.00
+MANTEQUILLA LALA 90G|PZA|Lácteos|18.50
+CREMA LALA 450ML|PZA|Lácteos|34.00
+CEPILLO DENTAL COLGATE ZIG ZAG|PZA|Higiene|22.00
+GALLETAS OREO 10PZ|PZA|Galletas|15.00
+SOPA MARUCHAN POLLO 64G|PZA|Sopas|14.50`;
+
+        let products = [];
+        let currentOrder = [];
+        let activeCategory = 'all';
+// ===============================
+// ✅ PERSISTENCIA LOCAL (MEJORA 1)
+// ===============================
+const STORAGE_KEYS = {
+  catalog: "ad.catalog.v1",
+  order: "ad.order.v1",
+  logo: "ad.logo.v1"
+};
+
+function saveOrder() {
+  localStorage.setItem(STORAGE_KEYS.order, JSON.stringify(currentOrder));
+}
+
+function loadOrder() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.order);
+    if (saved) currentOrder = JSON.parse(saved) || [];
+  } catch (e) {
+    currentOrder = [];
+  }
+}
+
+function saveCatalog() {
+  localStorage.setItem(STORAGE_KEYS.catalog, JSON.stringify(products));
+}
+
+function loadCatalog() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.catalog);
+    if (saved) {
+      products = JSON.parse(saved) || [];
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+
+function saveLogo(dataUrl) {
+  localStorage.setItem(STORAGE_KEYS.logo, dataUrl);
+}
+
+function loadLogo() {
+  return localStorage.getItem(STORAGE_KEYS.logo);
+}
+        function renderCatalog(search = "") {
+            const grid = document.getElementById('product-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            
+            const term = search.toLowerCase().trim();
+            const filtered = products.filter(p => 
+                (p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term)) && 
+                (activeCategory === 'all' || p.category === activeCategory)
+            );
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div class="col-span-full py-20 text-center text-slate-400 font-bold uppercase text-xs tracking-[0.2em]">Sin resultados registrados</div>';
+                return;
+            }
+
+            filtered.forEach(p => {
+                const item = currentOrder.find(o => o.name === p.name);
+                const qty = item ? item.qty : 0;
+                const div = document.createElement('div');
+                div.className = "product-card p-5 flex items-center justify-between fade-in";
+                div.innerHTML = `
+                    <div class="flex-1 pr-4">
+                        <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1">${p.category}</span>
+                        <h4 class="text-[15px] font-bold text-slate-800 leading-tight mb-2">${p.name}</h4>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] text-slate-400 font-black uppercase">${p.unit}</span>
+                            <span class="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">$${p.price.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div class="qty-box">
+                        <button onclick="updateQty('${p.name.replace(/'/g, "\\'")}', -1)" class="qty-btn text-slate-400 hover:text-slate-900">-</button>
+                        <span class="px-2 py-1 font-black text-slate-900 min-w-[2.5rem] text-center text-sm">${qty}</span>
+                        <button onclick="updateQty('${p.name.replace(/'/g, "\\'")}', 1)" class="qty-btn qty-btn-plus">+</button>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+            if (window.lucide) window.lucide.createIcons();
+        }
+function applySearch() {
+  const term = document.getElementById('search-input')?.value || "";
+  renderCatalog(term);
+}
+        function renderCategories() {
+            const container = document.getElementById('category-list');
+            const datalist = document.getElementById('cat-options');
+            if (!container) return;
+
+            const cats = [...new Set(products.map(p => p.category))].sort();
+            const allCats = ['all', ...cats];
+
+            container.innerHTML = '';
+            allCats.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = `category-pill ${activeCategory === c ? 'active' : ''}`;
+                btn.innerText = c === 'all' ? 'Ver Todos' : c;
+                btn.onclick = () => { 
+                    activeCategory = c; 
+                    renderCategories(); 
+                    renderCatalog(document.getElementById('search-input')?.value || ""); 
+                };
+                container.appendChild(btn);
+            });
+
+            if (datalist) {
+                datalist.innerHTML = '';
+                cats.forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c;
+                    datalist.appendChild(option);
+                });
+            }
+        }
+
+        window.updateQty = (name, delta) => {
+            const index = currentOrder.findIndex(o => o.name === name);
+            if (index > -1) {
+                currentOrder[index].qty += delta;
+                if (currentOrder[index].qty <= 0) currentOrder.splice(index, 1);
+            } else if (delta > 0) {
+                const prod = products.find(p => p.name === name);
+                currentOrder.push({ ...prod, qty: 1 });
+            }
+            saveOrder();
+updateSummary();
+            renderCatalog(document.getElementById('search-input')?.value || "");
+        };
+const startApp = () => {
+  const loaded = loadCatalog();
+  loadOrder();
+
+  // ✅ Solo si NO hay catálogo guardado, construir desde rawData
+  if (!loaded) {
+    const lines = rawData.split('\n').filter(l => l.trim().length > 0);
+    const uniqueMap = new Map();
+    lines.forEach(l => {
+      const [name, unit, cat, price] = l.split('|');
+      uniqueMap.set(name, {
+        name,
+        unit: unit || 'PZA',
+        category: cat || 'General',
+        price: parseFloat(price) || 0
+      });
+    });
+    products = Array.from(uniqueMap.values()).sort((a,b) => a.name.localeCompare(b.name));
+    saveCatalog(); // ✅ guardar catálogo base
+  }
+
+  document.getElementById('catalog-count').innerText = products.length;
+  renderCategories();
+  renderCatalog(document.getElementById('search-input')?.value || "");
+
+  // ✅ Logo persistente
+  const logoTrigger = document.getElementById('logo-trigger');
+  const logoInput = document.getElementById('logo-input');
+  const mainLogoImg = document.getElementById('main-logo-img');
+  const logoPlaceholder = document.getElementById('logo-placeholder');
+
+  const savedLogo = loadLogo();
+  if (savedLogo) {
+    mainLogoImg.src = savedLogo;
+    mainLogoImg.classList.remove('hidden');
+    logoPlaceholder.classList.add('hidden');
+  }
+
+  logoTrigger.addEventListener('click', () => logoInput.click());
+  logoInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      mainLogoImg.src = ev.target.result;
+      mainLogoImg.classList.remove('hidden');
+      logoPlaceholder.classList.add('hidden');
+      saveLogo(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+document.getElementById('provider-select')
+  ?.addEventListener('change', validateSaveButton);
+document.getElementById('btn-save-order')
+  ?.addEventListener('click', downloadOrderCSV);
+document.getElementById('btn-new-order')
+  ?.addEventListener('click', newOrder);
+  updateSummary();
+};
+
+window.onload = startApp;
+        function updateSummary() {
+            const totalItems = currentOrder.reduce((sum, item) => sum + item.qty, 0);
+            const totalCost = currentOrder.reduce((sum, item) => sum + (item.qty * item.price), 0);
+            document.getElementById('items-count').innerText = totalItems;
+            document.getElementById('total-display').innerText = `$${totalCost.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
+            const hasItems = currentOrder.length > 0;
+        validateSaveButton();
+
+}
+function newOrder() {
+  const ok = confirm(
+    "¿Seguro que quieres iniciar un nuevo pedido?\n\n" +
+    "Se borrarán las cantidades y el proveedor seleccionado."
+  );
+  if (!ok) return;
+
+  // Vaciar pedido
+  currentOrder = [];
+  saveOrder();
+
+  // Reset proveedor
+  const providerSelect = document.getElementById('provider-select');
+  if (providerSelect) providerSelect.value = "";
+
+  // Refrescar UI
+  updateSummary();
+  renderCatalog(document.getElementById('search-input')?.value || "");
+}
+function validateSaveButton() {
+ document.getElementById('btn-search')
+  ?.addEventListener('click', applySearch);
+
+document.getElementById('search-input')
+  ?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') applySearch();
+  }); 
+const provider = document.getElementById('provider-select')?.value || "";
+  const btnSave = document.getElementById('btn-save-order');
+  if (!btnSave) return;
+
+  // ✅ total real de cantidades (evita pedidos viejos “fantasma”)
+  const totalQty = currentOrder.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+
+  btnSave.disabled = !(provider && totalQty > 0);
+}
+function downloadOrderCSV() {
+  const provider = document.getElementById('provider-select')?.value || "";
+  if (!provider) {
+    alert("Selecciona un proveedor antes de guardar.");
+    return;
+  }
+
+  // Solo productos con qty > 0
+  const items = currentOrder.filter(i => (Number(i.qty) || 0) > 0);
+  if (items.length === 0) {
+    alert("No hay cantidades para guardar.");
+    return;
+  }
+
+  // Fecha YYYY-MM-DD
+  const date = new Date().toISOString().slice(0, 10);
+
+  // Nombre automático
+  const safeProvider = provider.replace(/[^\w\-]+/g, "_");
+  const fileName = `PEDIDO_${safeProvider}_${date}.csv`;
+
+  // Encabezados
+  const header = ["Proveedor", "Fecha", "Producto", "Categoría", "Unidad", "Precio", "Cantidad", "Importe"];
+  const rows = [header];
+
+  // Filas
+  items.forEach(p => {
+    const precio = Number(p.price) || 0;
+    const qty = Number(p.qty) || 0;
+    const importe = precio * qty;
+
+    rows.push([
+      provider,
+      date,
+      p.name,
+      p.category,
+      p.unit,
+      precio.toFixed(2),
+      qty,
+      importe.toFixed(2)
+    ]);
+  });
+
+  // Total
+  const total = items.reduce((sum, p) => sum + (Number(p.price) || 0) * (Number(p.qty) || 0), 0);
+  rows.push([]);
+  rows.push(["", "", "", "", "", "", "TOTAL", total.toFixed(2)]);
+
+  // Convertir a CSV (con comillas para Excel)
+  const csv = rows
+    .map(r => r.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
+  // Descargar
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function sendWhatsApp() {
+  const provider = document.getElementById('provider-select')?.value || "";
+  const items = currentOrder.filter(i => Number(i.qty) > 0);
+
+  if (!provider) {
+    alert("Selecciona un proveedor.");
+    return;
+  }
+
+  if (items.length === 0) {
+    alert("No hay productos en el pedido.");
+    return;
+  }
+
+  // ---- Construcción base del mensaje ----
+  const date = new Date().toLocaleDateString('es-MX');
+
+  // Si hay pocos, mandamos 1 solo mensaje
+  if (items.length <= 25) {
+    let message = `PEDIDO – Abarrotes Diana\nProveedor: ${provider}\nFecha: ${date}\n\n`;
+    items.forEach(p => { message += `• ${p.name} x ${p.qty}\n`; });
+
+    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.location.href = url;
+    return;
+  }
+
+  // ---- Si hay muchos, lo partimos en 2 mensajes ----
+  const mid = Math.ceil(items.length / 2);
+  const part1 = items.slice(0, mid);
+  const part2 = items.slice(mid);
+
+  let msg1 = `PEDIDO – Abarrotes Diana (1/2)\nProveedor: ${provider}\nFecha: ${date}\n\n`;
+  part1.forEach(p => { msg1 += `• ${p.name} x ${p.qty}\n`; });
+
+  let msg2 = `PEDIDO – Abarrotes Diana (2/2)\nProveedor: ${provider}\nFecha: ${date}\n\n`;
+  part2.forEach(p => { msg2 += `• ${p.name} x ${p.qty}\n`; });
+
+  // Abrir WhatsApp con el primer mensaje
+  const url1 = `https://wa.me/?text=${encodeURIComponent(msg1)}`;
+  window.location.href = url1;
+
+  // Luego abrir el segundo mensaje (en móvil necesita un pequeño retraso)
+  // Nota: Algunos teléfonos pedirán que regreses al navegador para que se dispare el 2/2.
+  setTimeout(() => {
+    const url2 = `https://wa.me/?text=${encodeURIComponent(msg2)}`;
+    window.location.href = url2;
+  }, 1200);
+}
+    
+    </script>
+</body>
+</html>
