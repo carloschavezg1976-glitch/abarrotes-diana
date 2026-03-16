@@ -762,50 +762,29 @@ function sendWhatsApp() {
   const provider = document.getElementById('provider-select')?.value || "";
   const items = currentOrder.filter(i => Number(i.qty) > 0);
 
-  if (!provider) {
-    alert("Selecciona un proveedor.");
-    return;
-  }
+  if (!provider) { alert("Selecciona un proveedor."); return; }
+  if (items.length === 0) { alert("No hay productos en el pedido."); return; }
 
-  if (items.length === 0) {
-    alert("No hay productos en el pedido.");
-    return;
-  }
-
-  // ---- Construcción base del mensaje ----
   const date = new Date().toLocaleDateString('es-MX');
+  let message = `PEDIDO – Abarrotes Diana\nProveedor: ${provider}\nFecha: ${date}\n\n`;
+  items.forEach(p => { message += `• ${p.name} x ${p.qty}\n`; });
 
-  // Si hay pocos, mandamos 1 solo mensaje
-  if (items.length <= 25) {
-    let message = `PEDIDO – Abarrotes Diana\nProveedor: ${provider}\nFecha: ${date}\n\n`;
-    items.forEach(p => { message += `• ${p.name} x ${p.qty}\n`; });
+  const encoded = encodeURIComponent(message);
 
-    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  const isAndroid = /Android/i.test(navigator.userAgent);
+
+  // ✅ Android: abre app (te funciona)
+  // ✅ PC/Laptop: abre WhatsApp Web directo (evita el “salto” de wa.me)
+  const url = isAndroid
+    ? `https://wa.me/?text=${encoded}`
+    : `https://web.whatsapp.com/send?text=${encoded}`;
+
+  // En PC usa window.open; en Android usa location
+  if (isAndroid) {
     window.location.href = url;
-    return;
+  } else {
+    window.open(url, "_blank");
   }
-
-  // ---- Si hay muchos, lo partimos en 2 mensajes ----
-  const mid = Math.ceil(items.length / 2);
-  const part1 = items.slice(0, mid);
-  const part2 = items.slice(mid);
-
-  let msg1 = `PEDIDO – Abarrotes Diana (1/2)\nProveedor: ${provider}\nFecha: ${date}\n\n`;
-  part1.forEach(p => { msg1 += `• ${p.name} x ${p.qty}\n`; });
-
-  let msg2 = `PEDIDO – Abarrotes Diana (2/2)\nProveedor: ${provider}\nFecha: ${date}\n\n`;
-  part2.forEach(p => { msg2 += `• ${p.name} x ${p.qty}\n`; });
-
-  // Abrir WhatsApp con el primer mensaje
-  const url1 = `https://wa.me/?text=${encodeURIComponent(msg1)}`;
-  window.location.href = url1;
-
-  // Luego abrir el segundo mensaje (en móvil necesita un pequeño retraso)
-  // Nota: Algunos teléfonos pedirán que regreses al navegador para que se dispare el 2/2.
-  setTimeout(() => {
-    const url2 = `https://wa.me/?text=${encodeURIComponent(msg2)}`;
-    window.location.href = url2;
-  }, 1200);
 }
     
     </script>
