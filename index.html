@@ -758,7 +758,7 @@ function downloadOrderCSV() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-function sendWhatsApp() {
+window.sendWhatsApp = function () {
   const provider = document.getElementById('provider-select')?.value || "";
   const items = currentOrder.filter(i => Number(i.qty) > 0);
 
