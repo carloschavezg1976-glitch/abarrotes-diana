@@ -758,34 +758,105 @@ function downloadOrderCSV() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-window.sendWhatsApp = function () {
+window.sendWhatsApp = async function () {
   const provider = document.getElementById('provider-select')?.value || "";
   const items = currentOrder.filter(i => Number(i.qty) > 0);
 
   if (!provider) { alert("Selecciona un proveedor."); return; }
   if (items.length === 0) { alert("No hay productos en el pedido."); return; }
 
-  const date = new Date().toLocaleDateString('es-MX');
-  let message = `PEDIDO – Abarrotes Diana\nProveedor: ${provider}\nFecha: ${date}\n\n`;
-  items.forEach(p => { message += `• ${p.name} x ${p.qty}\n`; });
-
-  const encoded = encodeURIComponent(message);
-
   const isAndroid = /Android/i.test(navigator.userAgent);
+  const date = new Date().toLocaleDateString('es-MX');
 
-  // ✅ Android: abre app (te funciona)
-  // ✅ PC/Laptop: abre WhatsApp Web directo (evita el “salto” de wa.me)
-  const url = isAndroid
-    ? `https://wa.me/?text=${encoded}`
-    : `https://web.whatsapp.com/send?text=${encoded}`;
+  // ✅ Leyenda en negrita + cursiva para WhatsApp: *_
+  const footer =
+    "\n\n*_favor de confirmar de recibido, te recordamos nuestros horarios para recepcion de mercancias de lunes a sabado de 8:00 - 14:00 horas y de 17:00-20:00 horas_*";
 
-  // En PC usa window.open; en Android usa location
-  if (isAndroid) {
+  const headerBase = `PEDIDO – Abarrotes Diana\nProveedor: ${provider}\nFecha: ${date}\n`;
+
+  // Si es corto, se manda en 1 solo mensaje (con leyenda al final)
+  if (items.length <= 20) {
+    let msg = `${headerBase}\n`;
+    items.forEach(p => { msg += `• ${p.name} x ${p.qty}\n`; });
+    msg += footer;
+
+    const url = isAndroid
+      ? `https://wa.me/?text=${encodeURIComponent(msg)}`
+      : `https://web.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+
     window.location.href = url;
-  } else {
-    window.open(url, "_blank");
+    return;
   }
-}
+
+  // ---- Partir en 2 mensajes ----
+  const mid = Math.ceil(items.length / 2);
+  const part1 = items.slice(0, mid);
+  const part2 = items.slice(mid);
+
+  let msg1 = `${headerBase}(1/2)\n\n`;
+  part1.forEach(p => { msg1 += `• ${p.name} x ${p.qty}\n`; });
+  msg1 += `\n(Continúa en 2/2)`;
+
+  let msg2 = `${headerBase}(2/2)\n\n`;
+  part2.forEach(p => { msg2 += `• ${p.name} x ${p.qty}\n`; });
+  msg2 += footer;
+
+  const url1 = isAndroid
+    ? `https://wa.me/?text=${encodeURIComponent(msg1)}`
+    : `https://web.whatsapp.com/send?text=${encodeURIComponent(msg1)}`;
+
+  const url2 = isAndroid
+    ? `https://wa.me/?text=${encodeURIComponent(msg2)}`
+    : `https://web.whatsapp.com/send?text=${encodeURIComponent(msg2)}`;
+
+  // --- Copiar al portapapeles con fallback ---
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (e) {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        return true;
+      } catch (e2) {
+        return false;
+      }
+    }
+  };
+
+  // ✅ Android/Tablet: abre 1/2 y copia 2/2
+  if (isAndroid) {
+    const copied = await copyToClipboard(msg2);
+    alert(
+      copied
+        ? "Abriré WhatsApp con el mensaje (1/2). El (2/2) ya quedó COPIADO; solo pégalo y envíalo."
+        : "Abriré WhatsApp con el mensaje (1/2). No pude copiar el (2/2) automático; si pasa, te lo preparo para copiar."
+    );
+    window.location.href = url1;
+    return;
+  }
+
+  // ✅ Laptop/PC: intentar abrir ambos (dos pestañas)
+  const w1 = window.open(url1, "_blank");
+  const w2 = window.open(url2, "_blank");
+
+  // Si el 2/2 fue bloqueado, lo copiamos para pegar
+  if (!w2) {
+    const copied = await copyToClipboard(msg2);
+    alert(
+      copied
+        ? "Se abrió (1/2). El navegador bloqueó el (2/2), pero ya lo COPIÉ: pega el (2/2) en WhatsApp y envíalo."
+        : "Se abrió (1/2). El navegador bloqueó el (2/2). Activa pop-ups para tu sitio y vuelve a intentar."
+    );
+  }
+};
     
     </script>
 </body>
