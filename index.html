@@ -758,19 +758,37 @@ window.sendWhatsApp = async function () {
   const provider = document.getElementById('provider-select')?.value || "";
   const items = currentOrder.filter(i => Number(i.qty) > 0);
 
-  if (!provider) { alert("Selecciona un proveedor."); return; }
-  if (items.length === 0) { alert("No hay productos en el pedido."); return; }
+  // ✅ Validaciones básicas
+  if (!provider) {
+    alert("Selecciona un proveedor.");
+    return;
+  }
+
+  if (items.length === 0) {
+    alert("No hay productos en el pedido.");
+    return;
+  }
+
+  // ✅ CONFIRMACIÓN ANTES DE ENVIAR
+  const confirmSend = confirm(
+    `¿Deseas enviar el pedido?\n\n` +
+    `Proveedor: ${provider}\n` +
+    `Productos: ${items.length}`
+  );
+
+  if (!confirmSend) {
+    return; // ⛔ Cancelado por el usuario
+  }
 
   const isAndroid = /Android/i.test(navigator.userAgent);
   const date = new Date().toLocaleDateString('es-MX');
 
-  // ✅ Leyenda en negrita + cursiva para WhatsApp: *_
   const footer =
     "\n\n*_favor de confirmar de recibido, te recordamos nuestros horarios para recepcion de mercancias de lunes a sabado de 8:00 - 14:00 horas y de 17:00-20:00 horas_*";
 
   const headerBase = `PEDIDO – Abarrotes Diana\nProveedor: ${provider}\nFecha: ${date}\n`;
 
-  // Si es corto, se manda en 1 solo mensaje (con leyenda al final)
+  // ✅ Pedido corto → un solo mensaje
   if (items.length <= 20) {
     let msg = `${headerBase}\n`;
     items.forEach(p => { msg += `• ${p.name} x ${p.qty}\n`; });
@@ -784,7 +802,7 @@ window.sendWhatsApp = async function () {
     return;
   }
 
-  // ---- Partir en 2 mensajes ----
+  // ✅ Pedido largo → 2 mensajes
   const mid = Math.ceil(items.length / 2);
   const part1 = items.slice(0, mid);
   const part2 = items.slice(mid);
@@ -805,54 +823,31 @@ window.sendWhatsApp = async function () {
     ? `https://wa.me/?text=${encodeURIComponent(msg2)}`
     : `https://web.whatsapp.com/send?text=${encodeURIComponent(msg2)}`;
 
-  // --- Copiar al portapapeles con fallback ---
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
       return true;
-    } catch (e) {
-      try {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.opacity = "0";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        return true;
-      } catch (e2) {
-        return false;
-      }
+    } catch {
+      return false;
     }
   };
 
-  // ✅ Android/Tablet: abre 1/2 y copia 2/2
   if (isAndroid) {
-    const copied = await copyToClipboard(msg2);
-    alert(
-      copied
-        ? "Abriré WhatsApp con el mensaje (1/2). El (2/2) ya quedó COPIADO; solo pégalo y envíalo."
-        : "Abriré WhatsApp con el mensaje (1/2). No pude copiar el (2/2) automático; si pasa, te lo preparo para copiar."
-    );
+    await copyToClipboard(msg2);
+    alert("Se abrirá WhatsApp con el mensaje (1/2). El (2/2) quedó copiado.");
     window.location.href = url1;
     return;
   }
 
-  // ✅ Laptop/PC: intentar abrir ambos (dos pestañas)
-  const w1 = window.open(url1, "_blank");
   const w2 = window.open(url2, "_blank");
+  window.open(url1, "_blank");
 
-  // Si el 2/2 fue bloqueado, lo copiamos para pegar
   if (!w2) {
-    const copied = await copyToClipboard(msg2);
-    alert(
-      copied
-        ? "Se abrió (1/2). El navegador bloqueó el (2/2), pero ya lo COPIÉ: pega el (2/2) en WhatsApp y envíalo."
-        : "Se abrió (1/2). El navegador bloqueó el (2/2). Activa pop-ups para tu sitio y vuelve a intentar."
-    );
+    await copyToClipboard(msg2);
+    alert("El mensaje (2/2) fue copiado porque el navegador bloqueó la segunda ventana.");
   }
 };
+
     
     </script>
 </body>
