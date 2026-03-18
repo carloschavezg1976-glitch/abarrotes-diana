@@ -513,10 +513,21 @@ function loadLogo() {
             grid.innerHTML = '';
             
             const term = search.toLowerCase().trim();
-            const filtered = products.filter(p => 
-                (p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term)) && 
-                (activeCategory === 'all' || p.category === activeCategory)
-            );
+            const selectedPasillo = document.getElementById("pasillo-select")?.value || "";
+
+const filtered = products.filter(p => {
+  const matchesSearch =
+    (p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term));
+
+  const matchesCategory =
+    (activeCategory === 'all' || p.category === activeCategory);
+
+  // ✅ Si el producto aún no tiene pasillo asignado, cae en "Sin pasillo"
+  const matchesPasillo =
+    (!selectedPasillo || (p.pasillo || "Sin pasillo") === selectedPasillo);
+
+  return matchesSearch && matchesCategory && matchesPasillo;
+});
 
             if (filtered.length === 0) {
                 grid.innerHTML = '<div class="col-span-full py-20 text-center text-slate-400 font-bold uppercase text-xs tracking-[0.2em]">Sin resultados registrados</div>';
@@ -619,7 +630,8 @@ const startApp = () => {
   document.getElementById('catalog-count').innerText = products.length;
   renderCategories();
   renderCatalog(document.getElementById('search-input')?.value || "");
-
+document.getElementById("pasillo-select")
+  ?.addEventListener("change", () => renderCatalog(document.getElementById('search-input')?.value || ""));
   // ✅ Logo persistente
   const logoTrigger = document.getElementById('logo-trigger');
   const logoInput = document.getElementById('logo-input');
