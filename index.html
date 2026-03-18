@@ -624,9 +624,11 @@ const startApp = () => {
       });
     });
     products = Array.from(uniqueMap.values()).sort((a,b) => a.name.localeCompare(b.name));
-    saveCatalog(); // ✅ guardar catálogo base
+   products = products.map(p => ({ ...p, pasillo: p.pasillo || "Sin pasillo" }));
+saveCatalog(); // ✅ guardar catálogo base (ya incluye pasillo)
   }
-
+products = products.map(p => ({ ...p, pasillo: p.pasillo || "Sin pasillo" }));
+saveCatalog();
   document.getElementById('catalog-count').innerText = products.length;
   renderCategories();
   renderCatalog(document.getElementById('search-input')?.value || "");
