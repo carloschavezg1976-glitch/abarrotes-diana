@@ -543,6 +543,16 @@ const filtered = products.filter(p => {
                     <div class="flex-1 pr-4">
                         <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1">${p.category}</span>
                         <h4 class="text-[15px] font-bold text-slate-800 leading-tight mb-2">${p.name}</h4>
+                        <div class="flex items-center gap-2 mt-2">
+  <button
+    onclick="assignPasillo('${p.name.replace(/'/g, "\\'")}')"
+    class="px-3 py-2 bg-slate-100 text-slate-700 rounded-xl text-[10px] font-black uppercase border border-slate-200">
+    Asignar pasillo
+  </button>
+  <span class="text-[10px] font-black text-slate-400 uppercase">
+    ${(p.pasillo || "Sin pasillo")}
+  </span>
+</div>
                         <div class="flex items-center gap-3">
                             <span class="text-[10px] text-slate-400 font-black uppercase">${p.unit}</span>
                             <span class="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">$${p.price.toFixed(2)}</span>
@@ -606,6 +616,46 @@ function applySearch() {
 updateSummary();
             renderCatalog(document.getElementById('search-input')?.value || "");
         };
+        const PASILLOS = {
+  "Pasillo 1": "Pañales y artículos para bebés",
+  "Pasillo 2": "Jabones líquidos y suavizantes de telas",
+  "Pasillo 3": "Detergentes en polvo y químicos",
+  "Pasillo 4": "Chiles enlatados y salsas",
+  "Pasillo 5": "Pastas y leches para bebés",
+  "Pasillo 6": "Chocolates en polvo y leches enlatadas",
+  "Pasillo 7": "Cereales y galletas",
+  "Pasillo 8": "Jugos, shampoos y jabones de baño",
+  "Pasillo 9": "Desechables y servilletas"
+};
+
+window.assignPasillo = (productName) => {
+  const prod = products.find(p => p.name === productName);
+  if (!prod) { alert("No encontré el producto."); return; }
+
+  const actual = prod.pasillo || "Sin pasillo";
+  const input = prompt(
+    `Asignar PASILLO para:\n${prod.name}\n\nActual: ${actual}\n\nEscribe un número del 1 al 9:`,
+    ""
+  );
+
+  if (!input) return;
+
+  const n = String(input).trim();
+  const key = `Pasillo ${n}`;
+
+  if (!PASILLOS[key]) {
+    alert("Opción inválida. Escribe un número del 1 al 9.");
+    return;
+  }
+
+  prod.pasillo = key;
+
+  // ✅ Persistir y refrescar
+  saveCatalog();
+  renderCatalog(document.getElementById('search-input')?.value || "");
+
+  alert(`Asignado: ${key} – ${PASILLOS[key]}`);
+};
 const startApp = () => {
   const loaded = loadCatalog();
   loadOrder();
