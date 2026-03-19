@@ -173,18 +173,20 @@
                 </div>
             </div>
           <div class="md:col-span-5">
-  <div class="search-container-bottom flex items-center gap-2 px-4 py-3">
+<div class="search-container-bottom flex flex-wrap md:flex-nowrap items-center gap-2 gap-y-2 px-4 py-3">
 
     <!-- ✅ Proveedor -->
-    <select id="provider-select"
-      class="px-3 py-2 bg-white border border-slate-200 rounded-xl font-black text-[11px] uppercase">
+     <select id="provider-select"
+  class="px-3 py-2 bg-white border border-slate-200 rounded-xl font-black text-[11px] uppercase w-full sm:w-auto">
       <option value="">Selecciona proveedor</option>
       <option>Abarrotes El Duero</option>
       <option>Abarrotera Z</option>
       <option>Disper</option>
     </select>
-<select id="pasillo-select"
-  class="px-3 py-2 bg-white border border-slate-200 rounded-xl font-black text-[11px] uppercase">
+
+select id="pasillo-select"
+  class="px-3 py-2 bg-white border border-slate-200 rounded-xl font-black text-[11px] uppercase w-full sm:w-auto">
+
   <option value="">Todos los pasillos</option>
   <option value="Pasillo 1">Pasillo 1 – Pañales y artículos para bebés</option>
   <option value="Pasillo 2">Pasillo 2 – Jabones líquidos y suavizantes</option>
@@ -198,10 +200,12 @@
 </select>
     <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
 
-    <input id="search-input"
-      type="text"
-      placeholder="Buscar producto…"
-      class="flex-1 outline-none text-slate-700 font-bold bg-transparent text-sm" />
+    
+<input id="search-input"
+  type="text"
+  placeholder="Buscar producto…"
+  class="flex-1 min-w-[140px] outline-none text-slate-700 font-bold bg-transparent text-sm" />
+
 
     <button id="btn-search"
       class="px-4 py-2 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase">
@@ -628,15 +632,71 @@ updateSummary();
   "Pasillo 9": "Desechables y servilletas"
 };
 
-window.assignPasillo = (productName) => {
-  const prod = products.find(p => p.name === productName);
+const PASILLOS = [
+  { key: "Pasillo 1", label: "Pañales y artículos para bebés" },
+  { key: "Pasillo 2", label: "Jabones líquidos y suavizantes de telas" },
+  { key: "Pasillo 3", label: "Detergentes en polvo y químicos" },
+  { key: "Pasillo 4", label: "Chiles enlatados y salsas" },
+  { key: "Pasillo 5", label: "Pastas y leches para bebés" },
+  { key: "Pasillo 6", label: "Chocolates en polvo y leches enlatadas" },
+  { key: "Pasillo 7", label: "Cereales y galletas" },
+  { key: "Pasillo 8", label: "Jugos, shampoos y jabones de baño" },
+  { key: "Pasillo 9", label: "Desechables y servilletas" }
+];
+
+let _pasilloTargetName = null;
+
+function openPasilloModal(productName) {
+  _pasilloTargetName = productName;
+
+  const modal = document.getElementById("modal-pasillo");
+  const title = document.getElementById("pasillo-product-name");
+  const grid  = document.getElementById("pasillo-grid");
+
+  if (!modal || !title || !grid) {
+    alert("No se encontró el modal de pasillos en el HTML.");
+    return;
+  }
+
+  title.textContent = productName;
+  grid.innerHTML = "";
+
+  PASILLOS.forEach(p => {
+    const btn = document.createElement("button");
+    btn.className = "w-full px-4 py-4 bg-slate-100 text-slate-800 rounded-2xl font-black text-[11px] uppercase border border-slate-200 hover:bg-slate-200";
+    btn.textContent = `${p.key} – ${p.label}`;
+    btn.onclick = () => setPasilloForTarget(p.key);
+    grid.appendChild(btn);
+  });
+
+  modal.classList.remove("hidden");
+}
+
+function closePasilloModal() {
+  const modal = document.getElementById("modal-pasillo");
+  if (modal) modal.classList.add("hidden");
+  _pasilloTargetName = null;
+}
+
+function setPasilloForTarget(pasilloKey) {
+  if (!_pasilloTargetName) return;
+
+  const prod = products.find(p => p.name === _pasilloTargetName);
   if (!prod) { alert("No encontré el producto."); return; }
 
-  const actual = prod.pasillo || "Sin pasillo";
-  const input = prompt(
-    `Asignar PASILLO para:\n${prod.name}\n\nActual: ${actual}\n\nEscribe un número del 1 al 9:`,
-    ""
-  );
+  prod.pasillo = pasilloKey;
+  saveCatalog();
+  closePasilloModal();
+
+  // refrescar catálogo con el término actual
+  renderCatalog(document.getElementById('search-input')?.value || "");
+}
+
+// ✅ Esta es la función que llama tu botón "Asignar pasillo"
+window.assignPasillo = (productName) => openPasilloModal(productName);
+
+// Cerrar modal (botón cancelar)
+document.getElementById("btn-cancel-pasillo")?.addEventListener("click", closePasilloModal);
 
   if (!input) return;
 
@@ -926,5 +986,18 @@ window.sendWhatsApp = async function () {
 
     
     </script>
+<!-- ✅ Modal para Asignar Pasillo -->
+<div id="modal-pasillo" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[160] flex items-center justify-center hidden p-4">
+  <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-md fade-in">
+    <h3 class="font-black text-slate-900 text-xl tracking-tight mb-2 text-center">Asignar Pasillo</h3>
+    <p id="pasillo-product-name" class="text-[12px] text-slate-500 font-bold text-center mb-6"></p>
+
+    <div id="pasillo-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+    <button id="btn-cancel-pasillo" class="mt-6 w-full py-4 text-slate-500 font-black text-xs uppercase">
+      Cancelar
+    </button>
+  </div>
+</div>
 </body>
 </html>
