@@ -720,26 +720,29 @@ const startApp = () => {
   const loaded = loadCatalog();
   loadOrder();
 
-  // ✅ Solo si NO hay catálogo guardado, construir desde rawData
-  if (!loaded) {
-    const lines = rawData.split('\n').filter(l => l.trim().length > 0);
-    const uniqueMap = new Map();
-    lines.forEach(l => {
-      const [name, unit, cat, price] = l.split('|');
-      uniqueMap.set(name, {
-        name,
-        unit: unit || 'PZA',
-        category: cat || 'General',
-        price: parseFloat(price) || 0
-      });
+  // ✅ Si NO hay catálogo O está vacío, reconstruir desde rawData
+if (!loaded || !Array.isArray(products) || products.length === 0) {
+  const lines = rawData.split('\n').filter(l => l.trim().length > 0);
+  const uniqueMap = new Map();
+
+  lines.forEach(l => {
+    // ✅ rawData viene separado por TAB (\t), no por |
+    const [name, unit, cat, price] = l.split('\t');
+
+    // Evitar entradas vacías
+    if (!name || !name.trim()) return;
+
+    uniqueMap.set(name, {
+      name: name.trim(),
+      unit: (unit || 'PZA').trim(),
+      category: (cat || 'General').trim(),
+      price: parseFloat(price) || 0,
+      pasillo: "Sin pasillo"
     });
-    products = Array.from(uniqueMap.values()).sort((a,b) => a.name.localeCompare(b.name));
-   products = products.map(p => ({ ...p, pasillo: p.pasillo || "Sin pasillo" }));
-saveCatalog(); // ✅ guardar catálogo base (ya incluye pasillo)
-  }
-products = products.map(p => ({ ...p, pasillo: p.pasillo || "Sin pasillo" }));
-saveCatalog();
-  document.getElementById('catalog-count').innerText = products.length;
+  });
+
+  products = Array.from(uniqueMap.values())
+    .sort((a,b
   renderCategories();
   renderCatalog(document.getElementById('search-input')?.value || "");
 document.getElementById("pasillo-select")
