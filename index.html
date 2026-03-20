@@ -745,7 +745,77 @@ btnCancelManual?.addEventListener('click', () => {
   modalManual?.classList.add('hidden');
 });
 };
+// ✅ Guardar producto manual al catálogo (robusto)
+function saveManualProduct() {
+  const nameEl = document.getElementById('manual-name');
+  const catEl  = document.getElementById('manual-cat');
+  const priceEl = document.getElementById('manual-price');
+  const modal = document.getElementById('modal-manual');
 
+  const name = (nameEl?.value || '').trim();
+  const category = (catEl?.value || '').trim() || 'General';
+
+  // price puede venir vacío o con texto
+  const priceRaw = (priceEl?.value || '').toString().trim();
+  const price = Number(priceRaw.replace(',', '.'));
+
+  if (!name) {
+    alert('Escribe el nombre del producto.');
+    nameEl?.focus();
+    return;
+  }
+
+  if (!Number.isFinite(price) || price <= 0) {
+    alert('Escribe un costo válido (mayor a 0).');
+    priceEl?.focus();
+    return;
+  }
+
+  // Normaliza para evitar duplicados por mayúsculas/espacios
+  const key = name.toLowerCase();
+
+  // Si ya existe, actualiza (más seguro que duplicar)
+  const idx = products.findIndex(p => (p.name || '').toLowerCase() === key);
+
+  const newItem = {
+    name,
+    category,
+    price,
+    // Mantén unidad si ya existe; si es nuevo, pon PZA por defecto
+    unit: (idx >= 0 && products[idx]?.unit) ? products[idx].unit : 'PZA'
+  };
+
+  if (idx >= 0) {
+    products[idx] = { ...products[idx], ...newItem };
+  } else {
+    products.push(newItem);
+  }
+
+  // Ordena para que el catálogo quede bonito
+  products.sort((a, b) => (a.name || '').localeCompare((b.name || ''), 'es'));
+
+  // Persistir + refrescar UI
+  saveCatalog();
+  document.getElementById('catalog-count').innerText = products.length;
+  renderCategories();
+  renderCatalog(document.getElementById('search-input')?.value || '');
+
+  // Limpiar formulario y cerrar modal
+  if (nameEl) nameEl.value = '';
+  if (catEl) catEl.value = '';
+  if (priceEl) priceEl.value = '';
+  modal?.classList.add('hidden');
+}
+
+// ✅ Conectar botón Guardar en Catálogo
+document.getElementById('btn-save-manual')
+  ?.addEventListener('click', saveManualProduct);
+
+// ✅ (Opcional pero útil) Enter en "Costo" guarda
+document.getElementById('manual-price')
+  ?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') saveManualProduct();
+  });
 window.onload = startApp;
         function updateSummary() {
             const totalItems = currentOrder.reduce((sum, item) => sum + item.qty, 0);
