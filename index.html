@@ -135,8 +135,8 @@
                     <p class="text-[10px] text-blue-600 font-bold uppercase tracking-[0.15em] mt-1.5">Catálogo Maestro Consolidado</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <button id="btn-add-manual" class="bg-slate-900 text-white p-3 rounded-2xl flex items-center gap-2 hover:bg-slate-800 active:scale-95 transition-transform">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <button id="btn-add-manual" class="w-full sm:w-auto justify-center bg-slate-900 text-white p-3 rounded-2xl flex items-center gap-2 hover:bg-slate-800 active:scale-95 transition-transform">
                     <i data-lucide="plus" class="w-5 h-5"></i>
                     <span class="text-[11px] font-black uppercase hidden md:inline tracking-wider">Nuevo Producto</span>
                 </button>
@@ -553,7 +553,7 @@ const filtered = products.filter(p => {
     ${(p.pasillo || "Sin pasillo")}
   </span>
 </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                             <span class="text-[10px] text-slate-400 font-black uppercase">${p.unit}</span>
                             <span class="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">$${p.price.toFixed(2)}</span>
                         </div>
