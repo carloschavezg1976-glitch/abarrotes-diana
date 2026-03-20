@@ -620,17 +620,7 @@ function applySearch() {
 updateSummary();
             renderCatalog(document.getElementById('search-input')?.value || "");
         };
-        const PASILLOS = {
-  "Pasillo 1": "Pañales y artículos para bebés",
-  "Pasillo 2": "Jabones líquidos y suavizantes de telas",
-  "Pasillo 3": "Detergentes en polvo y químicos",
-  "Pasillo 4": "Chiles enlatados y salsas",
-  "Pasillo 5": "Pastas y leches para bebés",
-  "Pasillo 6": "Chocolates en polvo y leches enlatadas",
-  "Pasillo 7": "Cereales y galletas",
-  "Pasillo 8": "Jugos, shampoos y jabones de baño",
-  "Pasillo 9": "Desechables y servilletas"
-};
+       
 
 const PASILLOS = [
   { key: "Pasillo 1", label: "Pañales y artículos para bebés" },
