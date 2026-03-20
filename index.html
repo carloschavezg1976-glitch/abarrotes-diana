@@ -728,6 +728,18 @@ document.getElementById('btn-save-order')
 document.getElementById('btn-new-order')
   ?.addEventListener('click', newOrder);
   updateSummary();
+    // ✅ Modal: Nuevo Producto (abrir/cerrar)
+const btnAddManual = document.getElementById('btn-add-manual');
+const modalManual = document.getElementById('modal-manual');
+const btnCancelManual = document.getElementById('btn-cancel-manual');
+
+btnAddManual?.addEventListener('click', () => {
+  modalManual?.classList.remove('hidden');
+});
+
+btnCancelManual?.addEventListener('click', () => {
+  modalManual?.classList.add('hidden');
+});
 };
 
 window.onload = startApp;
