@@ -480,6 +480,7 @@ SOPA MARUCHAN POLLO 64G|PZA|Sopas|14.50`;
         let products = [];
         let currentOrder = [];
         let activeCategory = 'all';
+        let editingProductIndex = null;
 // ===============================
 // ✅ PERSISTENCIA LOCAL (MEJORA 1)
 // ===============================
@@ -524,6 +525,32 @@ function saveLogo(dataUrl) {
 function loadLogo() {
   return localStorage.getItem(STORAGE_KEYS.logo);
 }
+     // ✅ Abrir modal precargado cuando se hace clic en el nombre del producto
+window.openEditProductByName = function(name) {
+  const p = products.find(x => x.name === name);
+  if (!p) return;
+
+  document.getElementById('manual-name').value = p.name || "";
+  document.getElementById('manual-cat').value  = p.category || "";
+  document.getElementById('manual-price').value = Number(p.price || 0);
+
+  document.getElementById('modal-manual')?.classList.remove('hidden');
+};
+
+// ✅ Listener seguro: se pone una sola vez y funciona aunque se re-renderice el catálogo
+(function attachEditClickOnce(){
+  const grid = document.getElementById('product-grid');
+  if (!grid) return;
+  if (grid.dataset.editHandler === "1") return;
+  grid.dataset.editHandler = "1";
+
+  grid.addEventListener('click', (e) => {
+    const el = e.target.closest('.product-name');
+    if (!el) return;
+    const name = el.textContent.trim();
+    window.openEditProductByName(name);
+  });
+})();
         function renderCatalog(search = "") {
             const grid = document.getElementById('product-grid');
             if (!grid) return;
@@ -559,12 +586,7 @@ const filtered = products.filter(p => {
                 div.innerHTML = `
                     <div class="flex-1 pr-4">
                         <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1">${p.category}</span>
-                       <h4
-  class="text-[15px] font-bold text-slate-800 leading-tight mb-2 cursor-pointer hover:underline"
-  onclick="window.openEditProductByName('${p.name.replace(/'/g, "\\'")}')"
->
-  ${p.name}
-</h4>
+                      <h4 class="product-name text-[15px] font-bold text-slate-800 leading-tight mb-2 cursor-pointer hover:underline">${p.name}</h4>
                   <div class="flex items-center gap-2 mt-2 bg-white border border-slate-200 rounded-xl px-3 py-2">
   <button
     onclick="assignPasillo('${p.name.replace(/'/g, "\\'")}')"
