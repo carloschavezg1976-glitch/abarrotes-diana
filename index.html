@@ -558,29 +558,24 @@ const filtered = products.filter(p => {
                 div.className = "product-card p-5 flex items-center justify-between fade-in";
                 div.innerHTML = `
                     <div class="flex-1 pr-4">
-                       div.innerHTML = `
-  <div class="flex-1 pr-4">
-    <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1">${p.category}</span>
-
-    <h4
-      class="product-name text-[15px] font-bold text-slate-800 leading-tight mb-2 cursor-pointer hover:underline"
-      data-name="${encodeURIComponent(p.name)}"
-    >
-      ${p.name}
-    </h4>
-
-    <div class="flex items-center gap-3">
-      <span class="text-[10px] text-slate-400 font-black uppercase">${p.unit}</span>
-      <span class="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">$${p.price.toFixed(2)}</span>
-    </div>
-  </div>
-
-  <div class="qty-box">
-    <button onclick="updateQty('${p.name.replace(/'/g, "\\'")}', -1)" class="qty-btn text-slate-400 hover:text-slate-900">-</button>
-    <span class="px-2 py-1 font-black text-slate-900 min-w-[2.5rem] text-center text-sm">${qty}</span>
-    <button onclick="updateQty('${p.name.replace(/'/g, "\\'")}', 1)" class="qty-btn qty-btn-plus">+</button>
-  </div>
-`;
+                        <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1">${p.category}</span>
+                       <h4
+  class="text-[15px] font-bold text-slate-800 leading-tight mb-2 cursor-pointer hover:underline"
+  onclick="window.openEditProductByName('${p.name.replace(/'/g, "\\'")}')"
+>
+  ${p.name}
+</h4>
+                  <div class="flex items-center gap-2 mt-2 bg-white border border-slate-200 rounded-xl px-3 py-2">
+  <button
+    onclick="assignPasillo('${p.name.replace(/'/g, "\\'")}')"
+    class="px-3 py-2 bg-slate-100 text-slate-700 rounded-xl text-[10px] font-black uppercase border border-slate-200">
+    Asignar pasillo
+  </button>
+  <span class="text-[10px] font-black text-slate-400 uppercase">
+    ${(p.pasillo || "Sin pasillo")}
+  </span>
+</div>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                             <span class="text-[10px] text-slate-400 font-black uppercase">${p.unit}</span>
                             <span class="text-[11px] font-black text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">$${p.price.toFixed(2)}</span>
                         </div>
@@ -592,19 +587,7 @@ const filtered = products.filter(p => {
                     </div>
                 `;
                 div.addEventListener('dblclick', () => window.openEditProductByName(p.name));
-                const nameEl = div.querySelector('.product-name');
-nameEl?.addEventListener('click', (e) => {
-  e.stopPropagation();
-  const name = decodeURIComponent(nameEl.dataset.name || "");
-  window.openEditProductByName?.(name);
-});
-     const nameEl = div.querySelector('.product-name');
-nameEl?.addEventListener('click', (e) => {
-  e.stopPropagation();
-  const name = decodeURIComponent(nameEl.dataset.name || "");
-  window.openEditProductByName?.(name);
-});
-            grid.appendChild(div);
+                grid.appendChild(div);
             });
             if (window.lucide) window.lucide.createIcons();
         }
