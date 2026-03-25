@@ -581,6 +581,7 @@ const filtered = products.filter(p => {
                         <button onclick="updateQty('${p.name.replace(/'/g, "\\'")}', 1)" class="qty-btn qty-btn-plus">+</button>
                     </div>
                 `;
+                div.addEventListener('dblclick', () => window.openEditProductByName(p.name));
                 grid.appendChild(div);
             });
             if (window.lucide) window.lucide.createIcons();
@@ -802,7 +803,21 @@ function saveManualProduct() {
   document.getElementById('catalog-count').innerText = products.length;
   renderCategories();
   renderCatalog(document.getElementById('search-input')?.value || '');
+// ✅ Abrir modal en modo "editar" (precarga campos)
+window.openEditProductByName = function(name) {
+  const p = products.find(x => x.name === name);
+  if (!p) return;
 
+  // Marca cuál se está editando (usa manual-id que ya agregaste)
+  const idEl = document.getElementById('manual-id');
+  if (idEl) idEl.value = p.name; // por ahora usamos el nombre como llave
+
+  document.getElementById('manual-name').value = p.name || "";
+  document.getElementById('manual-cat').value  = p.category || "";
+  document.getElementById('manual-price').value = Number(p.price || 0);
+
+  document.getElementById('modal-manual')?.classList.remove('hidden');
+};
   // Limpiar formulario y cerrar modal
   if (nameEl) nameEl.value = '';
   if (catEl) catEl.value = '';
