@@ -480,6 +480,21 @@ SOPA MARUCHAN POLLO 64G|PZA|Sopas|14.50`;
         let products = [];
         let currentOrder = [];
         let activeCategory = 'all';
+        // ✅ Abrir modal precargado para editar (por nombre)
+window.openEditProductByName = function(name) {
+  const p = products.find(x => x.name === name);
+  if (!p) return;
+
+  // manual-id (hidden) si ya lo agregaste
+  const idEl = document.getElementById('manual-id');
+  if (idEl) idEl.value = p.name; // por ahora usamos el nombre como llave
+
+  document.getElementById('manual-name').value = p.name || "";
+  document.getElementById('manual-cat').value  = p.category || "";
+  document.getElementById('manual-price').value = Number(p.price || 0);
+
+  document.getElementById('modal-manual')?.classList.remove('hidden');
+};
 // ===============================
 // ✅ PERSISTENCIA LOCAL (MEJORA 1)
 // ===============================
