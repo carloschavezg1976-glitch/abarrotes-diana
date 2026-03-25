@@ -559,9 +559,9 @@ const filtered = products.filter(p => {
                 div.innerHTML = `
                     <div class="flex-1 pr-4">
                         <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1">${p.category}</span>
-                       <h4
-  class="text-[15px] font-bold text-slate-800 leading-tight mb-2 cursor-pointer hover:underline"
-  onclick="window.openEditProductByName('${p.name.replace(/'/g, "\\'")}')"
+                      <h4
+  class="product-name text-[15px] font-bold text-slate-800 leading-tight mb-2 cursor-pointer hover:underline"
+  data-name="${encodeURIComponent(p.name)}"
 >
   ${p.name}
 </h4>
@@ -587,6 +587,12 @@ const filtered = products.filter(p => {
                     </div>
                 `;
                 div.addEventListener('dblclick', () => window.openEditProductByName(p.name));
+                const nameEl = div.querySelector('.product-name');
+nameEl?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const name = decodeURIComponent(nameEl.dataset.name || "");
+  window.openEditProductByName?.(name);
+});
                 grid.appendChild(div);
             });
             if (window.lucide) window.lucide.createIcons();
