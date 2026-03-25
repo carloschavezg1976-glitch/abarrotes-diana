@@ -559,7 +559,12 @@ const filtered = products.filter(p => {
                 div.innerHTML = `
                     <div class="flex-1 pr-4">
                         <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest block mb-1">${p.category}</span>
-                        <h4 class="text-[15px] font-bold text-slate-800 leading-tight mb-2">${p.name}</h4>
+                       <h4
+  class="text-[15px] font-bold text-slate-800 leading-tight mb-2 cursor-pointer hover:underline"
+  onclick="window.openEditProductByName('${p.name.replace(/'/g, "\\'")}')"
+>
+  ${p.name}
+</h4>
                   <div class="flex items-center gap-2 mt-2 bg-white border border-slate-200 rounded-xl px-3 py-2">
   <button
     onclick="assignPasillo('${p.name.replace(/'/g, "\\'")}')"
