@@ -142,6 +142,11 @@
                     <i data-lucide="plus" class="w-5 h-5"></i>
                     <span class="text-[11px] font-black uppercase hidden md:inline tracking-wider">Nuevo Producto</span>
                 </button>
+                <button id="btn-clean-duplicates"
+  class="w-full sm:w-auto justify-center bg-slate-100 text-slate-700 p-3 rounded-2xl font-black text-[11px] uppercase border border-slate-200 hover:bg-slate-200 active:scale-95 transition-transform">
+  Limpiar duplicados
+</button>
+                
                 <div class="bg-blue-50 text-blue-700 px-4 py-2.5 rounded-2xl text-[11px] font-black uppercase hidden sm:block">
                     Total: <span id="catalog-count" class="text-blue-900 font-black">0</span> Items
                 </div>
@@ -551,6 +556,94 @@ window.openEditProductByName = function(name) {
     window.openEditProductByName(name);
   });
 })();
+     // ✅ Limpieza segura de duplicados (solo "iguales" por mayúsculas/acentos/espacios)
+function normalizeName(name) {
+  return (name || "")
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita acentos
+    .replace(/[^a-z0-9]+/g, " ")                      // signos -> espacio
+    .replace(/\s+/g, " ")                             // espacios dobles
+    .trim();
+}
+
+function cleanDuplicateProductsSafe() {
+  if (!Array.isArray(products) || products.length === 0) {
+    alert("No hay productos para limpiar.");
+    return;
+  }
+
+  const map = new Map();
+  let removed = 0;
+
+  for (const p of products) {
+    const k = normalizeName(p.name);
+    if (!k) continue;
+
+    if (!map.has(k)) {
+      map.set(k, p);
+    } else {
+      removed++;
+    }
+  }
+
+  products = Array.from(map.values());
+
+  // Guardar y refrescar pantalla (tu app ya usa saveCatalog/renderCatalog/etc.) [1](https://bing.com/search?q=Visual+Studio+Code+guardar+archivo+Ctrl%2bS)
+  saveCatalog();
+  const countEl = document.getElementById('catalog-count');
+  if (countEl) countEl.innerText = products.length;
+
+  renderCategories();
+  renderCatalog(document.getElementById('search-input')?.value || "");
+  updateSummary();
+
+  alert(`Listo ✅ Eliminé ${removed} duplicados seguros.`);
+}
+      function normalizeName(name) {
+  return (name || "")
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function cleanDuplicateProductsSafe() {
+  if (!Array.isArray(products) || products.length === 0) {
+    alert("No hay productos para limpiar.");
+    return;
+  }
+
+  const map = new Map();
+  let removed = 0;
+
+  for (const p of products) {
+    const k = normalizeName(p.name);
+    if (!k) continue;
+
+    if (!map.has(k)) {
+      map.set(k, p);
+    } else {
+      removed++;
+    }
+  }
+
+  products = Array.from(map.values());
+
+  saveCatalog();
+  const countEl = document.getElementById('catalog-count');
+  if (countEl) countEl.innerText = products.length;
+
+  renderCategories();
+  renderCatalog(document.getElementById('search-input')?.value || "");
+  updateSummary();
+
+  alert(`Listo ✅ Eliminé ${removed} duplicados seguros.`);
+}
         function renderCatalog(search = "") {
             const grid = document.getElementById('product-grid');
             if (!grid) return;
@@ -701,6 +794,49 @@ window.assignPasillo = (productName) => {
 
   alert(`Asignado: ${key} – ${PASILLOS[key]}`);
 };
+    function normalizeName(name) {
+  return (name || "")
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita acentos
+    .replace(/[^a-z0-9]+/g, " ")                      // signos -> espacio
+    .replace(/\s+/g, " ")                             // espacios dobles
+    .trim();
+}
+
+function cleanDuplicateProductsSafe() {
+  if (!Array.isArray(products) || products.length === 0) {
+    alert("No hay productos para limpiar.");
+    return;
+  }
+
+  const map = new Map();
+  let removed = 0;
+
+  for (const p of products) {
+    const k = normalizeName(p.name);
+    if (!k) continue;
+
+    if (!map.has(k)) {
+      map.set(k, p);
+    } else {
+      removed++;
+    }
+  }
+
+  products = Array.from(map.values());
+
+  saveCatalog();
+  const countEl = document.getElementById('catalog-count');
+  if (countEl) countEl.innerText = products.length;
+
+  renderCategories();
+  renderCatalog(document.getElementById('search-input')?.value || "");
+  updateSummary();
+
+  alert(`Listo ✅ Eliminé ${removed} duplicados seguros.`);
+}    
 const startApp = () => {
   const loaded = loadCatalog();
   loadOrder();
@@ -767,7 +903,8 @@ document.getElementById('btn-new-order')
 const btnAddManual = document.getElementById('btn-add-manual');
 const modalManual = document.getElementById('modal-manual');
 const btnCancelManual = document.getElementById('btn-cancel-manual');
-
+const btnClean = document.getElementById('btn-clean-duplicates');
+btnClean?.addEventListener('click', cleanDuplicateProductsSafe);
 btnAddManual?.addEventListener('click', () => {
   modalManual?.classList.remove('hidden');
 });
