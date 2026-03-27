@@ -557,22 +557,9 @@ window.openEditProductByName = function(name) {
   });
 })();
      // ✅ Limpieza segura de duplicados (solo "iguales" por mayúsculas/acentos/espacios)
-function normalizeName(name) {
-  return (name || "")
-    .toString()
-    .trim()
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita acentos
-    .replace(/[^a-z0-9]+/g, " ")                      // signos -> espacio
-    .replace(/\s+/g, " ")                             // espacios dobles
-    .trim();
-}
 
-function cleanDuplicateProductsSafe() {
-  if (!Array.isArray(products) || products.length === 0) {
-    alert("No hay productos para limpiar.");
-    return;
-  }
+
+
 
   const map = new Map();
   let removed = 0;
@@ -601,22 +588,9 @@ function cleanDuplicateProductsSafe() {
 
   alert(`Listo ✅ Eliminé ${removed} duplicados seguros.`);
 }
-      function normalizeName(name) {
-  return (name || "")
-    .toString()
-    .trim()
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+     
 
-function cleanDuplicateProductsSafe() {
-  if (!Array.isArray(products) || products.length === 0) {
-    alert("No hay productos para limpiar.");
-    return;
-  }
+
 
   const map = new Map();
   let removed = 0;
