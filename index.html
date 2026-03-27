@@ -556,16 +556,7 @@ window.openEditProductByName = function(name) {
     window.openEditProductByName(name);
   });
 })();
-     // ✅ Limpieza segura de duplicados (solo "iguales" por mayúsculas/acentos/espacios)
-
-
-  products = Array.from(map.values());
-
-  // Guardar y refrescar pantalla (tu app ya usa saveCatalog/renderCatalog/etc.) [1](https://bing.com/search?q=Visual+Studio+Code+guardar+archivo+Ctrl%2bS)
-  saveCatalog();
-  products = Array.from(map.values());
-
-  saveCatalog();
+    
  
 
         function renderCatalog(search = "") {
@@ -751,6 +742,7 @@ function cleanDuplicateProductsSafe() {
 
   products = Array.from(dedupeMap.values());
 
+  // Guardar y refrescar
   saveCatalog();
   const catalogCountEl = document.getElementById('catalog-count');
   if (catalogCountEl) catalogCountEl.innerText = products.length;
