@@ -561,18 +561,7 @@ window.openEditProductByName = function(name) {
 
 
 
-  const map = new Map();
-  let removed = 0;
-
-  for (const p of products) {
-    const k = normalizeName(p.name);
-    if (!k) continue;
-
-    if (!map.has(k)) {
-      map.set(k, p);
-    } else {
-      removed++;
-    }
+ 
   
 
   products = Array.from(map.values());
@@ -591,19 +580,7 @@ window.openEditProductByName = function(name) {
      
 
 
-  const map = new Map();
-  let removed = 0;
-
-  for (const p of products) {
-    const k = normalizeName(p.name);
-    if (!k) continue;
-
-    if (!map.has(k)) {
-      map.set(k, p);
-    } else {
-      removed++;
-    }
-  }
+ 
 
   products = Array.from(map.values());
 
@@ -784,21 +761,21 @@ function cleanDuplicateProductsSafe() {
     return;
   }
 
-  const map = new Map();
+  const dedupeMap = new Map();
   let removed = 0;
 
   for (const p of products) {
     const k = normalizeName(p.name);
     if (!k) continue;
 
-    if (!map.has(k)) {
-      map.set(k, p);
+    if (!dedupeMap.has(k)) {
+      dedupeMap.set(k, p);
     } else {
       removed++;
     }
   }
 
-  products = Array.from(map.values());
+  products = Array.from(dedupeMap.values());
 
   saveCatalog();
   const countEl = document.getElementById('catalog-count');
@@ -809,7 +786,7 @@ function cleanDuplicateProductsSafe() {
   updateSummary();
 
   alert(`Listo ✅ Eliminé ${removed} duplicados seguros.`);
-}    
+}
 const startApp = () => {
   const loaded = loadCatalog();
   loadOrder();
