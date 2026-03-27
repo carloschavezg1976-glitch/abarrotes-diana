@@ -568,14 +568,7 @@ window.openEditProductByName = function(name) {
 
   // Guardar y refrescar pantalla (tu app ya usa saveCatalog/renderCatalog/etc.) [1](https://bing.com/search?q=Visual+Studio+Code+guardar+archivo+Ctrl%2bS)
   saveCatalog();
-  const countEl = document.getElementById('catalog-count');
-  if (countEl) countEl.innerText = products.length;
-
-  renderCategories();
-  renderCatalog(document.getElementById('search-input')?.value || "");
-  updateSummary();
-
-  alert(`Listo ✅ Eliminé ${removed} duplicados seguros.`);
+ 
 
      
 
@@ -585,15 +578,8 @@ window.openEditProductByName = function(name) {
   products = Array.from(map.values());
 
   saveCatalog();
-  const countEl = document.getElementById('catalog-count');
-  if (countEl) countEl.innerText = products.length;
+ 
 
-  renderCategories();
-  renderCatalog(document.getElementById('search-input')?.value || "");
-  updateSummary();
-
-  alert(`Listo ✅ Eliminé ${removed} duplicados seguros.`);
-}
         function renderCatalog(search = "") {
             const grid = document.getElementById('product-grid');
             if (!grid) return;
