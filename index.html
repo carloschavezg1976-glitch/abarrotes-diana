@@ -257,7 +257,8 @@
 
                     <label class="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Nombre</label>
                     <input id="manual-name" type="text" placeholder="Ej. Huevo San Juan" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500">
-<input id="manual-id" type="hidden" value="">
+<input id="manual-id" type="hidden" />
+                    <input id="manual-id" type="hidden" value="">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -274,6 +275,10 @@
             <div class="flex flex-col gap-3 mt-8">
                 <button id="btn-save-manual" class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">Guardar en Catálogo</button>
                 <button id="btn-cancel-manual"
+                    <button id="btn-delete-manual"
+  class="w-full py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
+  Eliminar producto
+</button>
                    onclick="document.getElementById('modal-manual')?.classList.add('hidden')" 
                     class="w-full py-4 text-slate-400 font-bold text-xs uppercase">Regresar</button>
             </div>
@@ -883,32 +888,79 @@ function saveManualProduct() {
   document.getElementById('catalog-count').innerText = products.length;
   renderCategories();
   renderCatalog(document.getElementById('search-input')?.value || '');
-// ✅ Abrir modal en modo "editar" (precarga campos)
-window.openEditProductByName = function(name) {
-  const p = products.find(x => x.name === name);
-  if (!p) return;
 
-  // Marca cuál se está editando (usa manual-id que ya agregaste)
-  const idEl = document.getElementById('manual-id');
-  if (idEl) idEl.value = p.name; // por ahora usamos el nombre como llave
-
-  document.getElementById('manual-name').value = p.name || "";
-  document.getElementById('manual-cat').value  = p.category || "";
-  document.getElementById('manual-price').value = Number(p.price || 0);
-
-  document.getElementById('modal-manual')?.classList.remove('hidden');
-};
   // Limpiar formulario y cerrar modal
   if (nameEl) nameEl.value = '';
   if (catEl) catEl.value = '';
   if (priceEl) priceEl.value = '';
   modal?.classList.add('hidden');
 }
+function deleteManualProduct() {
+  const idEl = document.getElementById('manual-id');
+  const nameEl = document.getElementById('manual-name');
+  const modal = document.getElementById('modal-manual');
 
+  // 1) ¿Qué producto se está editando?
+  const idName = (idEl?.value || "").trim();
+  const nameTyped = (nameEl?.value || "").trim();
+
+  // Preferimos el ID (nombre original al abrir el modal)
+  const targetName = idName || nameTyped;
+
+  if (!targetName) {
+    alert("No hay un producto seleccionado para eliminar.");
+    return;
+  }
+
+  // 2) Buscar el producto en el catálogo
+  const idx = products.findIndex(p => (p.name || "").trim() === targetName);
+
+  if (idx < 0) {
+    alert("No encontré ese producto en el catálogo (tal vez ya fue eliminado).");
+    return;
+  }
+
+  // 3) Confirmación
+  const ok = confirm(`¿Eliminar este producto del catálogo?\n\n${products[idx].name}`);
+  if (!ok) return;
+
+  // 4) Eliminar del catálogo
+  const removedProductName = products[idx].name;
+  products.splice(idx, 1);
+
+  // 5) También eliminar del pedido actual (si está)
+  const orderIdx = currentOrder.findIndex(o => (o.name || "") === removedProductName);
+  if (orderIdx >= 0) {
+    currentOrder.splice(orderIdx, 1);
+    saveOrder();
+  }
+
+  // 6) Guardar y refrescar interfaz
+  saveCatalog();
+
+  const countEl = document.getElementById('catalog-count');
+  if (countEl) countEl.innerText = products.length;
+
+  renderCategories();
+  renderCatalog(document.getElementById('search-input')?.value || "");
+  updateSummary();
+
+  // 7) Limpiar campos y cerrar modal
+  if (idEl) idEl.value = "";
+  if (nameEl) nameEl.value = "";
+  modal?.classList.add('hidden');
+
+  alert("✅ Producto eliminado.");
+}
 // ✅ Conectar botón Guardar en Catálogo
 document.getElementById('btn-save-manual')
   ?.addEventListener('click', saveManualProduct);
-
+document.getElementById('btn-delete-manual')
+  ?.addEventListener('click', deleteManualProduct);
+        document.getElementById('btn-delete-manual')
+  ?.addEventListener('click', deleteManualProduct);
+        document.getElementById('btn-delete-manual')
+  ?.addEventListener('click', deleteManualProduct);
 // ✅ (Opcional pero útil) Enter en "Costo" guarda
 document.getElementById('manual-price')
   ?.addEventListener('keydown', (e) => {
