@@ -764,8 +764,8 @@ function cleanDuplicateProductsSafe() {
   products = Array.from(dedupeMap.values());
 
   saveCatalog();
-  const countEl = document.getElementById('catalog-count');
-  if (countEl) countEl.innerText = products.length;
+  const catalogCountEl = document.getElementById('catalog-count');
+  if (catalogCountEl) catalogCountEl.innerText = products.length;
 
   renderCategories();
   renderCatalog(document.getElementById('search-input')?.value || "");
