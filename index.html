@@ -274,14 +274,28 @@
             </div>
             <div class="flex flex-col gap-3 mt-8">
                 <button id="btn-save-manual" class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">Guardar en Catálogo</button>
-                <button id="btn-cancel-manual"
-                    <button id="btn-delete-manual"
-  class="w-full py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
-  Eliminar producto
-</button>
-                   onclick="document.getElementById('modal-manual')?.classList.add('hidden')" 
-                    class="w-full py-4 text-slate-400 font-bold text-xs uppercase">Regresar</button>
-            </div>
+               <div class="flex flex-col gap-3 mt-8">
+
+ <div class="flex flex-col gap-3 mt-8">
+
+  <button id="btn-save-manual"
+    class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
+    Guardar en Catálogo
+  </button>
+
+  <button id="btn-delete-manual"
+    class="w-full py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
+    Eliminar producto
+  </button>
+
+  <button id="btn-cancel-manual"
+    onclick="const m=document.getElementById('modal-manual'); if(m){m.setAttribute('hidden',''); m.style.display='none'; m.classList.add('hidden');}"
+    class="w-full py-4 text-slate-400 font-bold text-xs uppercase">
+    Regresar
+  </button>
+
+
+</div>
         </div>
     </div>
 
