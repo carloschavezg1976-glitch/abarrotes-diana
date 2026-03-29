@@ -553,14 +553,55 @@ function loadLogo() {
 window.openEditProductByName = function(name) {
   const p = products.find(x => x.name === name);
   if (!p) return;
+// ✅ Abrir modal “fuerte” (revive aunque tenga hidden / display:none)
+ const modal = document.getElementById('modal-manual'); // ✅ ID real del modal
 
+  if (modal) {
+    modal.hidden = false;
+    modal.removeAttribute('hidden');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex'; // o 'block' si tu modal no usa flex
+  }
+   
   document.getElementById('manual-name').value = p.name || "";
   document.getElementById('manual-cat').value  = p.category || "";
   document.getElementById('manual-price').value = Number(p.price || 0);
 
   document.getElementById('modal-manual')?.classList.remove('hidden');
 };
+// ===============================
+// MODO TABLET: SOLO PEDIDOS (sin edición)
+// ===============================
+(() => {
+  // Detecta dispositivo táctil tipo tablet/phone
+  const isTouch = window.matchMedia?.('(pointer: coarse)')?.matches;
+  const minSide = Math.min(window.screen.width, window.screen.height);
+  const isTabletLike = isTouch && minSide >= 600; // umbral típico de tablet
 
+  if (!isTabletLike) return; // En laptop/desktop no hace nada
+
+  // 1) Bloquea la edición desde el nombre del producto
+  const originalOpenEdit = window.openEditProductByName;
+  window.openEditProductByName = function () {
+    if (!window.__tabletEditWarned) {
+      window.__tabletEditWarned = true;
+      alert('Modo tablet: la edición del catálogo está deshabilitada. Usa la laptop para editar.');
+    }
+    return; // no abre modal
+  };
+  window.openEditProductByName.__orig = originalOpenEdit;
+
+  // 2) Cierra el modal si por accidente quedara abierto
+  const modal = document.getElementById('modal-manual'); // tu modal real
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+    modal.setAttribute('hidden', '');
+    modal.hidden = true;
+  }
+
+  console.log('✅ Modo tablet (solo pedidos) activado: edición deshabilitada.');
+})();
 // ✅ Listener seguro: se pone una sola vez y funciona aunque se re-renderice el catálogo
 (function attachEditClickOnce(){
   const grid = document.getElementById('product-grid');
