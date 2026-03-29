@@ -1057,7 +1057,17 @@ document.getElementById('manual-price')
   ?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') saveManualProduct();
   });
-window.onload = startApp;
+window.onload = () => {
+  try {
+    startApp();
+  } catch (e) {
+    console.error(e);
+    alert("❌ Error al iniciar: " + (e?.message || e));
+  } finally {
+    // ✅ pase lo que pase, quitamos la pantalla de inicio
+    document.getElementById('splash')?.remove();
+  }
+};
         function updateSummary() {
             const totalItems = currentOrder.reduce((sum, item) => sum + item.qty, 0);
             const totalCost = currentOrder.reduce((sum, item) => sum + (item.qty * item.price), 0);
