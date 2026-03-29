@@ -156,6 +156,12 @@
                     <i data-lucide="plus" class="w-5 h-5"></i>
                     <span class="text-[11px] font-black uppercase hidden md:inline tracking-wider">Nuevo Producto</span>
                 </button>
+                <button id="btn-import-bulk"
+  onclick="document.getElementById('modal-import')?.classList.remove('hidden')"
+  class="w-full sm:w-auto justify-center bg-blue-600 text-white p-3 rounded-2xl flex items-center gap-2 hover:bg-blue-700 active:scale-95 transition-transform">
+  <i data-lucide="upload" class="w-5 h-5"></i>
+  <span class="text-[11px] font-black uppercase hidden md:inline tracking-wider">Importar Lista</span>
+</button>
                 <button id="btn-clean-duplicates"
   class="w-full sm:w-auto justify-center bg-slate-100 text-slate-700 p-3 rounded-2xl font-black text-[11px] uppercase border border-slate-200 hover:bg-slate-200 active:scale-95 transition-transform">
   Limpiar duplicados
@@ -312,6 +318,74 @@
 </div>
         </div>
     </div>
+// ✅ IMPORTAR LISTA (NOMBRE|UNIDAD|CATEGORIA|PRECIO) sin tocar rawData
+document.getElementById('btn-do-import')?.addEventListener('click', () => {
+  const bulkText = document.getElementById('bulk-text');
+  const importResult = document.getElementById('import-result');
+
+  const text = (bulkText?.value || '').trim();
+  if (!text) {
+    importResult.textContent = 'Pega al menos una línea.';
+    return;
+  }
+
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  let added = 0, updated = 0, skipped = 0;
+
+  lines.forEach(line => {
+    // Formato esperado: NOMBRE|UNIDAD|CATEGORIA|PRECIO
+    const parts = line.split('|').map(x => x.trim());
+
+    let name = parts[0] || '';
+    let unit = parts[1] || 'PZA';
+    let category = parts[2] || 'General';
+    let priceRaw = parts[3] ?? '';
+
+    // Permite formato corto: NOMBRE|PRECIO
+    if (parts.length === 2) {
+      unit = 'PZA';
+      category = 'General';
+      priceRaw = parts[1];
+    }
+
+    if (!name) { skipped++; return; }
+
+    // normaliza precio (coma o punto)
+    const price = Number(String(priceRaw).replace(',', '.'));
+    if (!Number.isFinite(price) || price <= 0) { skipped++; return; }
+
+    const key = name.toLowerCase();
+    const idx = products.findIndex(p => (p.name || '').toLowerCase() === key);
+
+    const item = { name, unit, category, price };
+
+    if (idx >= 0) {
+      products[idx] = { ...products[idx], ...item };
+      updated++;
+    } else {
+      products.push(item);
+      added++;
+    }
+  });
+
+  // Ordenar + refrescar UI
+  products.sort((a, b) => (a.name || '').localeCompare((b.name || ''), 'es'));
+  document.getElementById('catalog-count').innerText = products.length;
+  renderCategories();
+  renderCatalog(document.getElementById('search-input')?.value || '');
+
+  // Guardar si tu app tiene saveCatalog()
+  if (typeof saveCatalog === 'function') saveCatalog();
+
+  importResult.textContent = `✅ Importados: ${added} | Actualizados: ${updated} | Omitidos: ${skipped}`;
+
+  // Cerrar modal (opcional)
+  // document.getElementById('modal-import')?.classList.add('hidden');
+
+  // Re-render iconos si aplica
+  if (window.lucide) window.lucide.createIcons();
+});
 
     <!-- Modal para Reporte -->
     <div id="ticket-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[110] flex items-center justify-center hidden p-4">
