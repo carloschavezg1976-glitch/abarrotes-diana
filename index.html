@@ -902,7 +902,15 @@ btnAddManual?.addEventListener('click', () => {
 btnCancelManual?.addEventListener('click', () => {
   modalManual?.classList.add('hidden');
 });
-    document.getElementById('splash')?.remove();
+   // ✅ Splash: mostrar mínimo 1.5s y luego desvanecer (fade-out)
+const splash = document.getElementById('splash');
+if (splash) {
+  setTimeout(() => {
+    splash.style.transition = 'opacity 500ms ease';
+    splash.style.opacity = '0';
+    setTimeout(() => splash.remove(), 520);
+  }, 1500);
+}
 };
 // ✅ Guardar producto manual al catálogo (robusto)
 function saveManualProduct() {
