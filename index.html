@@ -1474,66 +1474,8 @@ window.bulkImport = function () {
 };
 
         // ✅ IMPORTAR LISTA (global) — para onclick="window.bulkImport()"
-window.bulkImport = function () {
-  const bulkText = document.getElementById('bulk-text');
-  const importResult = document.getElementById('import-result');
 
-  const text = (bulkText?.value || '').trim();
-  if (!text) {
-    if (importResult) importResult.textContent = 'Pega al menos una línea.';
-    return;
-  }
-
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-
-  let added = 0, updated = 0, skipped = 0;
-
-  lines.forEach(line => {
-    const parts = line.split('|').map(x => x.trim());
-
-    let name = parts[0] || '';
-    let unit = parts[1] || 'PZA';
-    let category = parts[2] || 'General';
-    let priceRaw = parts[3] ?? '';
-
-    // Permite formato corto: NOMBRE|PRECIO
-    if (parts.length === 2) {
-      unit = 'PZA';
-      category = 'General';
-      priceRaw = parts[1];
-    }
-
-    if (!name) { skipped++; return; }
-
-    const price = Number(String(priceRaw).replace(',', '.'));
-    if (!Number.isFinite(price) || price <= 0) { skipped++; return; }
-
-    const key = name.toLowerCase();
-    const idx = products.findIndex(p => (p.name || '').toLowerCase() === key);
-
-    const item = { name, unit, category, price };
-
-    if (idx >= 0) { products[idx] = { ...products[idx], ...item }; updated++; }
-    else { products.push(item); added++; }
-  });
-
-  products.sort((a, b) => (a.name || '').localeCompare((b.name || ''), 'es'));
-  document.getElementById('catalog-count').innerText = products.length;
-
-  renderCategories();
-  renderCatalog(document.getElementById('search-input')?.value || '');
-
-  if (typeof saveCatalog === 'function') saveCatalog();
-
-  if (importResult) {
-    importResult.textContent = `✅ Importados: ${added} | Actualizados: ${updated} | Omitidos: ${skipped}`;
-  }
-
-  if (window.lucide) window.lucide.createIcons();
-};
    // ✅ VERSIÓN ESTABLE – catálogo y pedidos funcionando  
     </script>
-</body>
-</html>
 </body>
 </html>
