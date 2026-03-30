@@ -441,6 +441,35 @@ PRUEBA 2|CJ|General|99.99
     <p class="text-[11px] text-slate-400 font-bold mt-4 text-center" id="import-result"></p>
   </div>
 </div>
+    <!-- ✅ Modal: Importar Lista -->
+<div id="modal-import" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[150] flex items-center justify-center hidden p-4">
+  <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-xl fade-in">
+    <h3 class="font-black text-slate-900 text-xl tracking-tight mb-2 text-center">Importar Productos</h3>
+    <p class="text-[11px] text-slate-400 font-bold uppercase mb-4 text-center">
+      Pega líneas con formato: <span class="text-slate-600">NOMBRE|UNIDAD|CATEGORIA|PRECIO</span>
+    </p>
+
+    <textarea id="bulk-text" rows="10"
+      class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500"
+      placeholder="PRUEBA 1|PZA|General|10.50"></textarea>
+
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <button id="btn-do-import"
+        onclick="window.bulkImport()"
+        class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
+        Importar
+      </button>
+
+      <button id="btn-cancel-import"
+        onclick="document.getElementById('modal-import')?.classList.add('hidden')"
+        class="w-full py-5 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase border border-slate-200">
+        Cancelar
+      </button>
+    </div>
+
+    <p id="import-result" class="text-[11px] text-slate-400 font-bold mt-4 text-center"></p>
+  </div>
+</div>
     <!-- Modal para Reporte -->
     <div id="ticket-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[110] flex items-center justify-center hidden p-4">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md max-h-[85vh] overflow-y-auto font-mono">
@@ -1489,6 +1518,64 @@ window.bulkImport = function () {
   if (typeof saveCatalog === 'function') saveCatalog();
 
   if (importResult) importResult.textContent = `✅ Importados: ${added} | Actualizados: ${updated} | Omitidos: ${skipped}`;
+  if (window.lucide) window.lucide.createIcons();
+};
+        // ✅ IMPORTAR LISTA (global) — para onclick="window.bulkImport()"
+window.bulkImport = function () {
+  const bulkText = document.getElementById('bulk-text');
+  const importResult = document.getElementById('import-result');
+
+  const text = (bulkText?.value || '').trim();
+  if (!text) {
+    if (importResult) importResult.textContent = 'Pega al menos una línea.';
+    return;
+  }
+
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  let added = 0, updated = 0, skipped = 0;
+
+  lines.forEach(line => {
+    const parts = line.split('|').map(x => x.trim());
+
+    let name = parts[0] || '';
+    let unit = parts[1] || 'PZA';
+    let category = parts[2] || 'General';
+    let priceRaw = parts[3] ?? '';
+
+    // Permite formato corto: NOMBRE|PRECIO
+    if (parts.length === 2) {
+      unit = 'PZA';
+      category = 'General';
+      priceRaw = parts[1];
+    }
+
+    if (!name) { skipped++; return; }
+
+    const price = Number(String(priceRaw).replace(',', '.'));
+    if (!Number.isFinite(price) || price <= 0) { skipped++; return; }
+
+    const key = name.toLowerCase();
+    const idx = products.findIndex(p => (p.name || '').toLowerCase() === key);
+
+    const item = { name, unit, category, price };
+
+    if (idx >= 0) { products[idx] = { ...products[idx], ...item }; updated++; }
+    else { products.push(item); added++; }
+  });
+
+  products.sort((a, b) => (a.name || '').localeCompare((b.name || ''), 'es'));
+  document.getElementById('catalog-count').innerText = products.length;
+
+  renderCategories();
+  renderCatalog(document.getElementById('search-input')?.value || '');
+
+  if (typeof saveCatalog === 'function') saveCatalog();
+
+  if (importResult) {
+    importResult.textContent = `✅ Importados: ${added} | Actualizados: ${updated} | Omitidos: ${skipped}`;
+  }
+
   if (window.lucide) window.lucide.createIcons();
 };
    // ✅ VERSIÓN ESTABLE – catálogo y pedidos funcionando  
