@@ -1479,7 +1479,12 @@ if (line.includes('|')) {
   if (importResult) {
     importResult.textContent = `✅ Importados: ${added} | Actualizados: ${updated} | Omitidos: ${skipped}`;
   }
-
+// ✅ Cerrar modal automáticamente si hubo cambios
+if ((added + updated) > 0) {
+  setTimeout(() => {
+    document.getElementById('modal-import')?.classList.add('hidden');
+  }, 800); // deja ver el mensaje un momentito
+}
   if (window.lucide) window.lucide.createIcons();
 };
 
