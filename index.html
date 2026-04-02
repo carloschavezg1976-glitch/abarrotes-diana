@@ -299,13 +299,13 @@
 
     <div class="flex flex-col gap-3 mt-8">
      <button id="btn-save-manual"
-  onclick="setTimeout(function(){ var m=document.getElementById('modal-manual'); if(m) m.classList.add('hidden'); }, 150)"
+ onclick="(function(){function c(){var m=document.getElementById('modal-manual'); if(m){m.classList.add('hidden'); m.style.display='none';}} setTimeout(c,50); setTimeout(c,400); setTimeout(c,1200); })()"
   class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
   Guardar en Catálogo
 </button>
 
-   <button id="btn-delete-manual"
-  onclick="setTimeout(function(){ var m=document.getElementById('modal-manual'); if(m) m.classList.add('hidden'); }, 150)"
+  <button id="btn-delete-manual"
+  onclick="(function(){function c(){var m=document.getElementById('modal-manual'); if(m){m.classList.add('hidden'); m.style.display='none';}} setTimeout(c,50); setTimeout(c,400); setTimeout(c,1200); })()"
   class="w-full py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
   Eliminar producto
 </button>
