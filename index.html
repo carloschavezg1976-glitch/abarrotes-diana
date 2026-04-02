@@ -489,6 +489,70 @@ PRUEBA 2|CJ|General|99.99
     </div>
 
     <script type="module">
+
+  // ✅ Versión de la app (cámbiala cada semana que publiques cambios)
+  const APP_VERSION = "2026-04-02_01";
+
+  // ✅ Detector de nueva versión (muestra aviso y permite actualizar)
+  (function versionWatcher() {
+    const KEY = "APP_VERSION_LAST";
+
+    function ensureBanner() {
+      let bar = document.getElementById("update-bar");
+      if (bar) return bar;
+
+      bar = document.createElement("div");
+      bar.id = "update-bar";
+      bar.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+        padding: 10px 12px; display: none;
+        background: #0f172a; color: #fff;
+        font: 800 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto;
+        letter-spacing: .08em; text-transform: uppercase;
+      `;
+
+      bar.innerHTML = `
+        <div style="max-width:1200px;margin:0 auto;display:flex;gap:10px;align-items:center;justify-content:space-between;">
+          <div>
+            ✅ Nueva versión disponible <span style="opacity:.8; font-weight:700; letter-spacing:.02em; text-transform:none;" id="update-version"></span>
+          </div>
+          <button id="btn-update-now"
+            style="
+              background:#22c55e;color:#0b1220;border:none;
+              padding:8px 12px;border-radius:10px;
+              font-weight:900; cursor:pointer;
+            ">
+            Actualizar
+          </button>
+        </div>
+      `;
+
+      document.body.appendChild(bar);
+      return bar;
+    }
+
+    function forceReloadNoCache() {
+      const url = new URL(window.location.href);
+      url.searchParams.set("v", String(Date.now()));
+      window.location.replace(url.toString());
+    }
+
+    const last = localStorage.getItem(KEY) || "";
+
+    if (last && last !== APP_VERSION) {
+      const bar = ensureBanner();
+      bar.querySelector("#update-version").textContent = `(antes: ${last} / ahora: ${APP_VERSION})`;
+      bar.style.display = "block";
+
+      bar.querySelector("#btn-update-now").addEventListener("click", () => {
+        localStorage.setItem(KEY, APP_VERSION);
+        forceReloadNoCache();
+      });
+    } else {
+      localStorage.setItem(KEY, APP_VERSION);
+    }
+  })();
+
   // --- BASE DE DATOS MAESTRA ACTUAL (450+ ARTÍCULOS) ---
   const rawData = `...` = `AC NUTRIOLI DE SOYA 12/850ML|CJ|Aceites|442.84
 AC NUTRIOLI DE SOYA 12/400ML|CJ|Aceites|228.20
