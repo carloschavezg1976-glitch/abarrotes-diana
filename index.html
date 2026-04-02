@@ -1013,6 +1013,14 @@ saveCatalog();
   renderCatalog(document.getElementById('search-input')?.value || "");
 document.getElementById("pasillo-select")
   ?.addEventListener("change", () => renderCatalog(document.getElementById('search-input')?.value || ""));
+    document.getElementById('btn-search')
+  ?.addEventListener('click', applySearch);
+
+document.getElementById('search-input')
+  ?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') applySearch();
+  });
+``
   // ✅ Logo persistente
   const logoTrigger = document.getElementById('logo-trigger');
   const logoInput = document.getElementById('logo-input');
@@ -1191,10 +1199,7 @@ function deleteManualProduct() {
 // ✅ Conectar botón Guardar en Catálogo
 document.getElementById('btn-save-manual')
   ?.addEventListener('click', saveManualProduct);
-document.getElementById('btn-delete-manual')
-  ?.addEventListener('click', deleteManualProduct);
-        document.getElementById('btn-delete-manual')
-  ?.addEventListener('click', deleteManualProduct);
+
         document.getElementById('btn-delete-manual')
   ?.addEventListener('click', deleteManualProduct);
 // ✅ (Opcional pero útil) Enter en "Costo" guarda
@@ -1242,13 +1247,7 @@ function newOrder() {
   renderCatalog(document.getElementById('search-input')?.value || "");
 }
 function validateSaveButton() {
- document.getElementById('btn-search')
-  ?.addEventListener('click', applySearch);
 
-document.getElementById('search-input')
-  ?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') applySearch();
-  }); 
 const provider = document.getElementById('provider-select')?.value || "";
   const btnSave = document.getElementById('btn-save-order');
   if (!btnSave) return;
