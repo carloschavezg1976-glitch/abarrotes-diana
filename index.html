@@ -298,23 +298,23 @@
     </div>
 
     <div class="flex flex-col gap-3 mt-8">
- <button id="btn-save-manual"
-  onclick="setTimeout(()=>document.getElementById('modal-manual')?.classList.add('hidden'), 50)"
-  class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
-  Guardar en Catálogo
-</button>
+      <button id="btn-save-manual"
+        class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
+        Guardar en Catálogo
+      </button>
 
-  <button id="btn-delete-manual"
-    class="w-full py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
-    Eliminar producto
-  </button>
+      <button id="btn-delete-manual"
+        class="w-full py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
+        Eliminar producto
+      </button>
 
-<button id="btn-cancel-manual"
-  onclick="document.getElementById('modal-manual')?.classList.add('hidden')"
-  class="w-full py-4 text-slate-400 font-bold text-xs uppercase">
-  Regresar
-</button>
-</div>  </div>
+      <button id="btn-cancel-manual"
+        onclick="document.getElementById('modal-manual')?.classList.add('hidden')"
+        class="w-full py-4 text-slate-400 font-bold text-xs uppercase">
+        Regresar
+      </button>
+    </div>
+  </div>
 </div>
 <!-- ✅ Modal: Importar Lista -->
 <div id="modal-import" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[150] flex items-center justify-center hidden p-4">
@@ -348,7 +348,128 @@ CAF NESCAFE CLASICO 16/42GR|CJ|Bebidas|626.56
     <p class="text-[11px] text-slate-400 font-bold mt-4 text-center" id="import-result"></p>
   </div>
 </div>
+<!-- ✅ Modal: Importar Lista -->
+<div id="modal-import" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[150] flex items-center justify-center hidden p-4">
+  <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-xl fade-in">
+    <h3 class="font-black text-slate-900 text-xl tracking-tight mb-2 text-center">Importar Productos</h3>
+    <p class="text-[11px] text-slate-400 font-bold uppercase mb-4 text-center">
+      Pega líneas con formato: <span class="text-slate-600">NOMBRE|UNIDAD|CATEGORIA|PRECIO</span>
+    </p>
 
+    <textarea id="bulk-text" rows="10"
+      class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500"
+      placeholder="Ejemplo:
+LCH LA LECHERA POUCH 20/209GR|CJ|Lácteos|273.95
+CAF NESCAFE CLASICO 16/42GR|CJ|Bebidas|626.56
+"></textarea>
+
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <button id="btn-do-import"
+        onclick="bulkImport()"
+        class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
+        Importar
+      </button>
+
+      <button id="btn-cancel-import"
+        onclick="document.getElementById('modal-import')?.classList.add('hidden')"
+        class="w-full py-5 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase border border-slate-200">
+        Cancelar
+      </button>
+    </div>
+
+    <p class="text-[11px] text-slate-400 font-bold mt-4 text-center" id="import-result"></p>
+  </div>
+</div>
+    <!-- ✅ Modal: Importar Lista -->
+<div id="modal-import" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[150] flex items-center justify-center hidden p-4">
+  <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-xl fade-in">
+    <h3 class="font-black text-slate-900 text-xl tracking-tight mb-2 text-center">Importar Productos</h3>
+
+    <textarea id="bulk-text" rows="10"
+      class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500"
+      placeholder="Ejemplo:
+PRUEBA 1|PZA|General|10.50
+PRUEBA 2|CJ|General|99.99
+"></textarea>
+
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <button id="btn-do-import"
+        onclick="bulkImport()"
+        class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
+        Importar
+      </button>
+
+      <button id="btn-cancel-import"
+        onclick="document.getElementById('modal-import')?.classList.add('hidden')"
+        class="w-full py-5 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase border border-slate-200">
+        Cancelar
+      </button>
+    </div>
+
+    <p class="text-[11px] text-slate-400 font-bold mt-4 text-center" id="import-result"></p>
+  </div>
+</div>
+    <!-- ✅ Modal: Importar Lista -->
+<div id="modal-import" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[150] flex items-center justify-center hidden p-4">
+  <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-xl fade-in">
+    <h3 class="font-black text-slate-900 text-xl tracking-tight mb-2 text-center">Importar Productos</h3>
+    <p class="text-[11px] text-slate-400 font-bold uppercase mb-4 text-center">
+      Pega líneas con formato: <span class="text-slate-600">NOMBRE|UNIDAD|CATEGORIA|PRECIO</span>
+    </p>
+
+    <textarea id="bulk-text" rows="10"
+      class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500"
+      placeholder="Ejemplo:
+PRUEBA 1|PZA|General|10.50
+PRUEBA 2|CJ|General|99.99
+"></textarea>
+
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <button id="btn-do-import"
+        onclick="bulkImport()"
+        class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
+        Importar
+      </button>
+
+      <button id="btn-cancel-import"
+        onclick="document.getElementById('modal-import')?.classList.add('hidden')"
+        class="w-full py-5 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase border border-slate-200">
+        Cancelar
+      </button>
+    </div>
+
+    <p class="text-[11px] text-slate-400 font-bold mt-4 text-center" id="import-result"></p>
+  </div>
+</div>
+    <!-- ✅ Modal: Importar Lista -->
+<div id="modal-import" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[150] flex items-center justify-center hidden p-4">
+  <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-xl fade-in">
+    <h3 class="font-black text-slate-900 text-xl tracking-tight mb-2 text-center">Importar Productos</h3>
+    <p class="text-[11px] text-slate-400 font-bold uppercase mb-4 text-center">
+      Pega líneas con formato: <span class="text-slate-600">NOMBRE|UNIDAD|CATEGORIA|PRECIO</span>
+    </p>
+
+    <textarea id="bulk-text" rows="10"
+      class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none focus:border-blue-500"
+      placeholder="PRUEBA 1|PZA|General|10.50"></textarea>
+
+    <div class="grid grid-cols-2 gap-3 mt-4">
+      <button id="btn-do-import"
+        onclick="window.bulkImport()"
+        class="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl">
+        Importar
+      </button>
+
+      <button id="btn-cancel-import"
+        onclick="document.getElementById('modal-import')?.classList.add('hidden')"
+        class="w-full py-5 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase border border-slate-200">
+        Cancelar
+      </button>
+    </div>
+
+    <p id="import-result" class="text-[11px] text-slate-400 font-bold mt-4 text-center"></p>
+  </div>
+</div>
     <!-- Modal para Reporte -->
     <div id="ticket-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[110] flex items-center justify-center hidden p-4">
         <div class="bg-white p-10 rounded-[3rem] shadow-2xl w-full max-w-md max-h-[85vh] overflow-y-auto font-mono">
@@ -917,72 +1038,6 @@ document.getElementById("pasillo-select")
     };
     reader.readAsDataURL(file);
   });
-    // ====== NUEVO PRODUCTO (Abrir / Guardar / Regresar) ======
-const modalManual = document.getElementById('modal-manual');
-const btnOpenManual = document.getElementById('btn-add-manual');
-const btnCancelManual = document.getElementById('btn-cancel-manual');
-const btnSaveManual = document.getElementById('btn-save-manual');
-
-function clearManualForm() {
-  const n = document.getElementById('manual-name');
-  const c = document.getElementById('manual-cat');
-  const p = document.getElementById('manual-price');
-  if (n) n.value = '';
-  if (c) c.value = '';
-  if (p) p.value = '';
-}
-
-function closeManualModal() {
-  if (!modalManual) return;
-  modalManual.classList.add('hidden');
-  clearManualForm();
-}
-
-function openManualModal() {
-  if (!modalManual) return;
-  modalManual.classList.remove('hidden');
-  // opcional: enfocar el nombre
-  setTimeout(() => document.getElementById('manual-name')?.focus(), 0);
-}
-
-btnOpenManual?.addEventListener('click', openManualModal);
-btnCancelManual?.addEventListener('click', closeManualModal);
-
-btnSaveManual?.addEventListener('click', () => {
-  const name = document.getElementById('manual-name')?.value?.trim() || '';
-  const cat  = document.getElementById('manual-cat')?.value?.trim() || 'General';
-  const price = parseFloat(document.getElementById('manual-price')?.value) || 0;
-
-  if (!name) return;
-
-  const newProd = {
-    name: name.toUpperCase(),
-    unit: 'PZA',          // si manejas unidad en el form, aquí se cambia
-    category: cat,
-    price
-  };
-
-  // Evitar duplicados por nombre
-  const idx = products.findIndex(p => (p.name || '').toUpperCase() === newProd.name);
-  if (idx >= 0) {
-    products[idx] = { ...products[idx], ...newProd }; // "editar" si ya existe
-  } else {
-    products.push(newProd); // "nuevo"
-  }
-
-  products.sort((a,b) => a.name.localeCompare(b.name));
-
-  // Persistencia (si existe tu función)
-  if (typeof saveCatalog === 'function') saveCatalog();
-
-  // Refrescar UI
-  document.getElementById('catalog-count').innerText = products.length;
-  if (typeof renderCategories === 'function') renderCategories();
-  if (typeof renderCatalog === 'function') renderCatalog(document.getElementById('search-input')?.value || '');
-
-  // ✅ Cerrar y regresar
-  closeManualModal();
-});
 document.getElementById('provider-select')
   ?.addEventListener('change', validateSaveButton);
 document.getElementById('btn-save-order')
