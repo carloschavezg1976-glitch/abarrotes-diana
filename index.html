@@ -904,7 +904,13 @@ document.getElementById("pasillo-select")
   u.searchParams.set("v", String(Date.now())); // rompe caché
   window.location.replace(u.toString());
 });
-  ?.addEventListener("change", () => renderCatalog(document.getElementById('search-input')?.value || ""));
+  var pas = document.getElementById("pasillo-select");
+if (pas) {
+  pas.addEventListener("change", function () {
+    var si = document.getElementById("search-input");
+    renderCatalog(si ? si.value : "");
+  });
+}
     document.getElementById('btn-search')
   ?.addEventListener('click', applySearch);
 
