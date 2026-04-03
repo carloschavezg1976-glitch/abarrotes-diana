@@ -1412,5 +1412,13 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 });
     </script>
+    <script>
+  // Fuerza recarga "fresca" agregando/actualizando ?v=TIMESTAMP
+  function reloadFresh() {
+    const url = new URL(window.location.href);
+    url.searchParams.set('v', Date.now().toString());
+    window.location.replace(url.toString());
+  }
+</script>
 </body>
 </html>
