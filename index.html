@@ -1576,5 +1576,172 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   })();
 </script>
+<script>
+/* 🔒 Candado simple (anti-niños / curiosos)
+   - No es “anti-hackers” (es client-side), pero sí evita acceso accidental.
+*/
+
+const APP_PIN = "1958";       // ✅ CAMBIA AQUÍ TU PIN
+const REMEMBER_HOURS = 1;     // ✅ Cuántas horas dura “Recordar”
+const KEY_OK_UNTIL = "ad_ok_until";
+const KEY_TRIES = "ad_tries";
+const KEY_LOCK_UNTIL = "ad_lock_until";
+
+function ms(){ return Date.now(); }
+
+function isUnlocked(){
+  const sessionOk = sessionStorage.getItem("ad_session_ok") === "1";
+  const until = parseInt(localStorage.getItem(KEY_OK_UNTIL) || "0", 10);
+  return sessionOk || ms() < until;
+}
+
+function isLocked(){
+  const until = parseInt(localStorage.getItem(KEY_LOCK_UNTIL) || "0", 10);
+  return ms() < until;
+}
+
+function setUnlocked(remember){
+  sessionStorage.setItem("ad_session_ok", "1");
+  if (remember){
+    localStorage.setItem(KEY_OK_UNTIL, String(ms() + REMEMBER_HOURS * 60 * 60 * 1000));
+  }
+  localStorage.setItem(KEY_TRIES, "0");
+  localStorage.setItem(KEY_LOCK_UNTIL, "0");
+}
+
+function logoutLock(){
+  sessionStorage.removeItem("ad_session_ok");
+  localStorage.removeItem(KEY_OK_UNTIL);
+  localStorage.removeItem(KEY_TRIES);
+  localStorage.removeItem(KEY_LOCK_UNTIL);
+  location.reload();
+}
+window.logoutLock = logoutLock; // por si quieres un botón "Cerrar sesión"
+
+function showLockScreen(){
+  const overlay = document.createElement("div");
+  overlay.id = "ad-lock";
+  overlay.style.cssText = `
+    position: fixed; inset: 0; z-index: 99999999;
+    background: #0b1220;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  `;
+
+  const card = document.createElement("div");
+  card.style.cssText = `
+    width: min(420px, 100%);
+    background: #111827;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px;
+    padding: 16px;
+    color: #fff;
+    box-shadow: 0 20px 50px rgba(0,0,0,.35);
+  `;
+
+  const title = document.createElement("div");
+  title.textContent = "Abarrotes Diana — Acceso";
+  title.style.cssText = "font-weight: 800; font-size: 18px; margin-bottom: 6px;";
+
+  const msg = document.createElement("div");
+  msg.id = "ad-lock-msg";
+  msg.textContent = "Ingresa el PIN para continuar.";
+  msg.style.cssText = "opacity: .85; margin-bottom: 12px; font-size: 14px;";
+
+  const input = document.createElement("input");
+  input.type = "password";
+  input.inputMode = "numeric";
+  input.placeholder = "PIN";
+  input.autocomplete = "current-password";
+  input.style.cssText = `
+    width: 100%; padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.06);
+    color: #fff; outline: none; font-size: 16px;
+  `;
+
+  const rememberRow = document.createElement("label");
+  rememberRow.style.cssText = "display:flex; align-items:center; gap:8px; margin:12px 0 10px; font-size:14px; opacity:.9;";
+  const chk = document.createElement("input");
+  chk.type = "checkbox";
+  chk.checked = true;
+  const txt = document.createElement("span");
+  txt.textContent = `Recordar ${REMEMBER_HOURS} horas`;
+  rememberRow.appendChild(chk);
+  rememberRow.appendChild(txt);
+
+  const btn = document.createElement("button");
+  btn.textContent = "Entrar";
+  btn.style.cssText = `
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #22c55e;
+    color: #0b1220;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 16px;
+  `;
+
+  function error(text){
+    msg.textContent = text;
+    msg.style.color = "#fca5a5";
+  }
+
+  function attempt(){
+    if (isLocked()){
+      const until = parseInt(localStorage.getItem(KEY_LOCK_UNTIL) || "0", 10);
+      const sec = Math.ceil((until - ms()) / 1000);
+      error(`Bloqueado por seguridad. Intenta de nuevo en ${sec}s.`);
+      return;
+    }
+
+    const val = (input.value || "").trim();
+    if (val === APP_PIN){
+      setUnlocked(chk.checked);
+      overlay.remove();
+      return;
+    }
+
+    let tries = parseInt(localStorage.getItem(KEY_TRIES) || "0", 10) + 1;
+    localStorage.setItem(KEY_TRIES, String(tries));
+    input.value = "";
+
+    if (tries >= 5){
+      localStorage.setItem(KEY_LOCK_UNTIL, String(ms() + 60 * 1000)); // 60s
+      error("Demasiados intentos. Bloqueado 60 segundos.");
+    } else {
+      error(`PIN incorrecto. Intento ${tries}/5.`);
+    }
+  }
+
+  btn.onclick = attempt;
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") attempt(); });
+
+  card.appendChild(title);
+  card.appendChild(msg);
+  card.appendChild(input);
+  card.appendChild(rememberRow);
+  card.appendChild(btn);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+
+  setTimeout(() => input.focus(), 50);
+}
+
+// Ejecuta al cargar
+(function(){
+  try{
+    if (!isUnlocked()){
+      showLockScreen();
+    }
+  } catch(e){
+    console.warn("Lock screen error:", e);
+  }
+})();
+</script>
 </body>
 </html>
