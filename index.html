@@ -1629,16 +1629,16 @@ function startProductRain(canvas, items) {
   }
   resize();
 
-  const count = Math.min(30, Math.max(18, Math.floor(canvas.width / 45)));
+  const count = Math.min(22, Math.max(14, Math.floor(canvas.width / 45)));
   const drops = [];
   for (let i = 0; i < count; i++) {
     drops.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      speed: 0.6 + Math.random() * 1.6,
-      size: 12 + Math.random() * 14,
+      speed: 0.3 + Math.random() * 0.9,
+      size: 16 + Math.random() * 18,
       text: items[Math.floor(Math.random() * items.length)],
-      alpha: 0.10 + Math.random() * 0.25
+      alpha: 0.06 + Math.random() * 0.18
     });
   }
 
@@ -1724,7 +1724,7 @@ function showLockScreen(){
 
   const msg = document.createElement("div");
   msg.id = "ad-lock-msg";
-  msg.textContent = "Abarrotes Diana: por favor identifícate para continuar.";
+ sg.textContent = "Abarrotes Diana — Por favor identifícate para continuar.";
   msg.style.cssText = "opacity:.85;margin-bottom:12px;font-size:14px;";
 
   const input = document.createElement("input");
