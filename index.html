@@ -1583,6 +1583,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 const APP_PIN = "1958";       // ✅ CAMBIA AQUÍ TU PIN
 const REMEMBER_HOURS = .0833;     // ✅ Cuántas horas dura “Recordar”
+   const ALWAYS_REQUIRE_PIN = true; // ✅ SIEMPRE pedir PIN al abrir 
 const KEY_OK_UNTIL = "ad_ok_until";
 const KEY_TRIES = "ad_tries";
 const KEY_LOCK_UNTIL = "ad_lock_until";
@@ -1747,79 +1748,20 @@ overlay.remove();ve();
 }
 
 // Ejecuta al cargar
-(function(){
-  try{
-    if (!isUnlocked()){
-   // 🎨 Fondo animado (lluvia de productos) - puedes editar esta lista
-const ENABLE_PRODUCT_RAIN = true;
+const ALWAYS_REQUIRE_PIN = true; // ✅ Siempre pedir PIN al abrir
 
-// Puedes cambiar/editar estos productos cuando quieras (texto o emojis)
-const PRODUCT_RAIN_ITEMS = [
-  "🥛 Leche", "🍞 Pan", "🥚 Huevo", "🥤 Refresco", "🍚 Arroz",
-  "🫘 Frijol", "🍝 Pasta", "🧂 Sal", "🍬 Dulces", "🧻 Papel",
-  "🧼 Jabón", "🧴 Shampoo", "🧃 Jugo", "🧀 Queso", "🍅 Jitomate"
-];
-        function startProductRain(canvas, items) {
-  const ctx = canvas.getContext("2d");
-  let running = true;
+const ALWAYS_REQUIRE_PIN = true;
 
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-
-  const count = Math.min(30, Math.max(20, Math.floor(canvas.width / 35)));
-  const drops = Array.from({ length: count }, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    speed: 0.6 + Math.random() * 1.6,
-    size: 12 + Math.random() * 14,
-    text: items[Math.floor(Math.random() * items.length)],
-    alpha: 0.10 + Math.random() * 0.25
-  }));
-
-  function tick() {
-    if (!running) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Fondo suave
-    ctx.fillStyle = "#0b1220";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // “Lluvia” de productos
-    for (const d of drops) {
-      ctx.font = `600 ${d.size}px system-ui, Segoe UI, Arial`;
-      ctx.fillStyle = `rgba(255,255,255,${d.alpha})`;
-      ctx.fillText(d.text, d.x, d.y);
-
-      d.y += d.speed;
-      if (d.y > canvas.height + 20) {
-        d.y = -10;
-        d.x = Math.random() * canvas.width;
-        d.text = items[Math.floor(Math.random() * items.length)];
-      }
+(function () {
+  try {
+    if (ALWAYS_REQUIRE_PIN) {
+      showLockScreen();
+      return;
     }
-
-    requestAnimationFrame(tick);
-  }
-
-  tick();
-
-  // Ajuste al rotar/cambiar tamaño
-  const onResize = () => resize();
-  window.addEventListener("resize", onResize);
-
-  // Función para parar la animación cuando se quite el candado
-  return () => {
-    running = false;
-    window.removeEventListener("resize", onResize);
-  };
-}
-        showLockScreen();
+    if (!isUnlocked()) {
+      showLockScreen();
     }
-  } catch(e){
+  } catch (e) {
     console.warn("Lock screen error:", e);
   }
 })();
