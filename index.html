@@ -1827,5 +1827,35 @@ function showLockScreen(){
   }
 })();
 </script>
+    <script>
+(function(){
+  // ✅ Ruta del logo dentro del repo:
+  const LOGO_URL = "assets/logo-diana.jpg";  // <-- usa el nombre que subiste
+
+  // Busca un contenedor existente del header (ajusta si tu header tiene otro id/clase)
+  const header = document.querySelector("header");
+  if (!header) return;
+
+  // Evita duplicar si ya está
+  if (header.querySelector("#fixed-diana-logo")) return;
+
+  // Crea el bloque del logo
+  const wrap = document.createElement("div");
+  wrap.id = "fixed-diana-logo";
+  wrap.className = "brand-logo-container";  // reutiliza tu CSS existente [2](https://norfipc.com/web/como-crear-aplicacion-web-progresiva-para-moviles.php)
+
+  const img = document.createElement("img");
+  img.src = LOGO_URL;
+  img.alt = "Abarrotes Diana";
+  img.style.width = "100%";
+  img.style.height = "100%";
+  img.style.objectFit = "cover";
+
+  wrap.appendChild(img);
+
+  // Lo insertamos al inicio del header
+  header.insertBefore(wrap, header.firstChild);
+})();
+</script>
 </body>
 </html>
