@@ -1578,21 +1578,12 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script>
 /* 🔒 Candado simple (anti-niños / curiosos)
-   - Pide PIN SIEMPRE que abras la app (ALWAYS_REQUIRE_PIN = true)
-   - Incluye lluvia de productos mientras se ingresa el PIN
+   - No es “anti-hackers” (es client-side), pero sí evita acceso accidental.
 */
 
-const APP_PIN = "1958";               // ✅ TU PIN
-const ALWAYS_REQUIRE_PIN = true;      // ✅ SIEMPRE pedir PIN al abrir
-const ENABLE_PRODUCT_RAIN = true;     // ✅ Lluvia ON/OFF
-const PRODUCT_RAIN_ITEMS = [
-  "🥛 Leche", "🍞 Pan", "🥚 Huevo", "🥤 Refresco", "🍚 Arroz",
-  "🫘 Frijol", "🍝 Pasta", "🧂 Sal", "🍬 Dulces", "🧻 Papel",
-  "🧼 Jabón", "🧴 Shampoo", "🧃 Jugo", "🧀 Queso", "🍅 Jitomate"
-];
-
-// (opcional) si quieres “recordar” aunque ALWAYS_REQUIRE_PIN=false
-const REMEMBER_HOURS = 0.1667; // 10 min
+const APP_PIN = "1958";       // ✅ CAMBIA AQUÍ TU PIN
+const REMEMBER_HOURS = .0833;     // ✅ Cuántas horas dura “Recordar”
+   const ALWAYS_REQUIRE_PIN = true; // ✅ SIEMPRE pedir PIN al abrir 
 const KEY_OK_UNTIL = "ad_ok_until";
 const KEY_TRIES = "ad_tries";
 const KEY_LOCK_UNTIL = "ad_lock_until";
@@ -1619,148 +1610,95 @@ function setUnlocked(remember){
   localStorage.setItem(KEY_LOCK_UNTIL, "0");
 }
 
-function startProductRain(canvas, items) {
-  const ctx = canvas.getContext("2d");
-  let running = true;
-
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-
-  const count = Math.min(30, Math.max(18, Math.floor(canvas.width / 45)));
-  const drops = [];
-  for (let i = 0; i < count; i++) {
-    drops.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      speed: 0.6 + Math.random() * 1.6,
-      size: 12 + Math.random() * 14,
-      text: items[Math.floor(Math.random() * items.length)],
-      alpha: 0.10 + Math.random() * 0.25
-    });
-  }
-
-  function tick() {
-    if (!running) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // fondo
-    ctx.fillStyle = "#0b1220";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // lluvia
-    for (let i = 0; i < drops.length; i++) {
-      const d = drops[i];
-      ctx.font = "600 " + d.size + "px system-ui, Segoe UI, Arial";
-      ctx.fillStyle = "rgba(255,255,255," + d.alpha + ")";
-      ctx.fillText(d.text, d.x, d.y);
-
-      d.y += d.speed;
-      if (d.y > canvas.height + 20) {
-        d.y = -10;
-        d.x = Math.random() * canvas.width;
-        d.text = items[Math.floor(Math.random() * items.length)];
-      }
-    }
-
-    requestAnimationFrame(tick);
-  }
-
-  tick();
-
-  function onResize(){ resize(); }
-  window.addEventListener("resize", onResize);
-
-  return function stop() {
-    running = false;
-    window.removeEventListener("resize", onResize);
-  };
+function logoutLock(){
+  sessionStorage.removeItem("ad_session_ok");
+  localStorage.removeItem(KEY_OK_UNTIL);
+  localStorage.removeItem(KEY_TRIES);
+  localStorage.removeItem(KEY_LOCK_UNTIL);
+  location.reload();
 }
+window.logoutLock = logoutLock; // por si quieres un botón "Cerrar sesión"
 
 function showLockScreen(){
   const overlay = document.createElement("div");
   overlay.id = "ad-lock";
-  overlay.style.cssText = [
-    "position: fixed", "inset: 0", "z-index: 99999999",
-    "background: #0b1220",
-    "display: flex", "align-items: center", "justify-content: center",
-    "padding: 16px",
-    "font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif"
-  ].join(";");
-
-  // fondo animado
+  overlay.style.cssText = `
+    position: fixed; inset: 0; z-index: 99999999;
+    background: #0b1220;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  `;
+// 🎨 Fondo animado (canvas)
   let stopRain = null;
   if (ENABLE_PRODUCT_RAIN && Array.isArray(PRODUCT_RAIN_ITEMS) && PRODUCT_RAIN_ITEMS.length) {
     const canvas = document.createElement("canvas");
-    canvas.style.cssText = [
-      "position: absolute", "inset: 0",
-      "width: 100%", "height: 100%",
-      "pointer-events: none",
-      "z-index: 0"
-    ].join(";");
+    canvas.style.cssText = `
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 1;
+    `;
     overlay.appendChild(canvas);
     stopRain = startProductRain(canvas, PRODUCT_RAIN_ITEMS);
   }
-
   const card = document.createElement("div");
-  card.style.cssText = [
-    "width: min(420px, 100%)",
-    "background: #111827",
-    "border: 1px solid rgba(255,255,255,.12)",
-    "border-radius: 14px",
-    "padding: 16px",
-    "color: #fff",
-    "box-shadow: 0 20px 50px rgba(0,0,0,.35)",
-    "position: relative",
-    "z-index: 1"
-  ].join(";");
+  card.style.cssText = `
+    width: min(420px, 100%);
+    background: #111827;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px;
+    padding: 16px;
+    color: #fff;
+    box-shadow: 0 20px 50px rgba(0,0,0,.35);
+  `;
 
   const title = document.createElement("div");
-  title.textContent = "Bienvenido a tu Gestor de Pedidos";
-  title.style.cssText = "font-weight:800;font-size:18px;margin-bottom:6px;";
+ title.textContent = "Abarrotes Diana — Acceso";
+  title.style.cssText = "font-weight: 800; font-size: 18px; margin-bottom: 6px;";
 
   const msg = document.createElement("div");
   msg.id = "ad-lock-msg";
-  msg.textContent = "Abarrotes Diana: por favor identifícate para continuar.";
-  msg.style.cssText = "opacity:.85;margin-bottom:12px;font-size:14px;";
+ msg.textContent = "Abarrotes Diana: por favor identifícate para continuar.";
+  msg.style.cssText = "opacity: .85; margin-bottom: 12px; font-size: 14px;";
 
   const input = document.createElement("input");
   input.type = "password";
   input.inputMode = "numeric";
   input.placeholder = "PIN";
   input.autocomplete = "current-password";
-  input.style.cssText = [
-    "width:100%","padding:12px",
-    "border-radius:12px",
-    "border:1px solid rgba(255,255,255,.18)",
-    "background:rgba(255,255,255,.06)",
-    "color:#fff","outline:none",
-    "font-size:16px"
-  ].join(";");
+  input.style.cssText = `
+    width: 100%; padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.06);
+    color: #fff; outline: none; font-size: 16px;
+  `;
 
-  // “Recordar” solo se usa si algún día ALWAYS_REQUIRE_PIN=false
   const rememberRow = document.createElement("label");
-  rememberRow.style.cssText = "display:flex;align-items:center;gap:8px;margin:12px 0 10px;font-size:14px;opacity:.9;";
+  rememberRow.style.cssText = "display:flex; align-items:center; gap:8px; margin:12px 0 10px; font-size:14px; opacity:.9;";
   const chk = document.createElement("input");
   chk.type = "checkbox";
   chk.checked = true;
   const txt = document.createElement("span");
-  txt.textContent = "Recordar " + Math.round(REMEMBER_HOURS * 60) + " min";
+  txt.textContent = `Recordar ${REMEMBER_HOURS} horas`;
   rememberRow.appendChild(chk);
   rememberRow.appendChild(txt);
 
   const btn = document.createElement("button");
   btn.textContent = "Entrar";
-  btn.style.cssText = [
-    "width:100%","padding:12px",
-    "border-radius:12px","border:none",
-    "background:#22c55e","color:#0b1220",
-    "font-weight:800","cursor:pointer",
-    "font-size:16px"
-  ].join(";");
+  btn.style.cssText = `
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: #22c55e;
+    color: #0b1220;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 16px;
+  `;
 
   function error(text){
     msg.textContent = text;
@@ -1771,15 +1709,15 @@ function showLockScreen(){
     if (isLocked()){
       const until = parseInt(localStorage.getItem(KEY_LOCK_UNTIL) || "0", 10);
       const sec = Math.ceil((until - ms()) / 1000);
-      error("Bloqueado por seguridad. Intenta de nuevo en " + sec + "s.");
+      error(`Bloqueado por seguridad. Intenta de nuevo en ${sec}s.`);
       return;
     }
 
     const val = (input.value || "").trim();
     if (val === APP_PIN){
       setUnlocked(chk.checked);
-      if (stopRain) stopRain();
-      overlay.remove();
+      overlay.remoif (stopRain) stopRain();
+overlay.remove();ve();
       return;
     }
 
@@ -1788,31 +1726,32 @@ function showLockScreen(){
     input.value = "";
 
     if (tries >= 5){
-      localStorage.setItem(KEY_LOCK_UNTIL, String(ms() + 30 * 1000)); // 30s
-      error("Demasiados intentos. Bloqueado 30 segundos.");
+      localStorage.setItem(KEY_LOCK_UNTIL, String(ms() + 60 * 1000)); // 60s
+      error("Demasiados intentos. Bloqueado 60 segundos.");
     } else {
-      error("PIN incorrecto. Intento " + tries + "/5.");
+      error(`PIN incorrecto. Intento ${tries}/5.`);
     }
   }
 
   btn.onclick = attempt;
-  input.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") attempt();
-  });
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") attempt(); });
 
   card.appendChild(title);
   card.appendChild(msg);
   card.appendChild(input);
   card.appendChild(rememberRow);
   card.appendChild(btn);
-
   overlay.appendChild(card);
   document.body.appendChild(overlay);
 
-  setTimeout(function () { input.focus(); }, 50);
+  setTimeout(() => input.focus(), 50);
 }
 
 // Ejecuta al cargar
+const ALWAYS_REQUIRE_PIN = true; // ✅ Siempre pedir PIN al abrir
+
+const ALWAYS_REQUIRE_PIN = true;
+
 (function () {
   try {
     if (ALWAYS_REQUIRE_PIN) {
