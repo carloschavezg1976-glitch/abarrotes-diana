@@ -242,7 +242,10 @@
       type="text"
       placeholder="Buscar producto…"
       class="flex-1 outline-none text-slate-700 font-bold bg-transparent text-sm" />
-
+<button id="btn-focus-scan"
+  class="px-3 py-2 bg-white border border-slate-200 rounded-xl font-black text-[11px] uppercase text-slate-700">
+  Escanear
+</button>
     <button id="btn-search"
       class="px-4 py-2 bg-slate-900 text-white rounded-xl text-[11px] font-black uppercase">
       Ir
@@ -1855,6 +1858,104 @@ const LOGO_URL = "assets/logodiana.jpg";
   // Lo insertamos al inicio del header
   header.insertBefore(wrap, header.firstChild);
 })();
+</script>
+    <!-- ✅ RESPALDO / RESTAURAR (GLOBAL) -->
+<script>
+  // Exporta TODO lo guardado en localStorage + sessionStorage (incluye ad.catalog.v1 con pasillos)
+  window.exportarRespaldo = function exportarRespaldo() {
+    const localDump = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      localDump[k] = localStorage.getItem(k);
+    }
+
+    const sessionDump = {};
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      sessionDump[k] = sessionStorage.getItem(k);
+    }
+
+    const payload = {
+      app: "Abarrotes Diana",
+      when: new Date().toISOString(),
+      localStorage: localDump,
+      sessionStorage: sessionDump
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "ABARROTES_DIANA_RESPALDO_" + new Date().toISOString().slice(0,10) + ".json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+
+    alert("✅ Respaldo descargado. Guárdalo también en Drive/USB.");
+  };
+
+  // Restaura TODO (incluye pasillos). OJO: sobreescribe lo que exista en ese dispositivo.
+  window.restaurarRespaldo = function restaurarRespaldo() {
+    const inp = document.createElement("input");
+    inp.type = "file";
+    inp.accept = "application/json";
+
+    inp.onchange = () => {
+      const file = inp.files && inp.files[0];
+      if (!file) return;
+
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          const data = JSON.parse(r.result);
+
+          if (data.localStorage) {
+            for (const k of Object.keys(data.localStorage)) {
+              localStorage.setItem(k, data.localStorage[k]);
+            }
+          }
+
+          if (data.sessionStorage) {
+            for (const k of Object.keys(data.sessionStorage)) {
+              sessionStorage.setItem(k, data.sessionStorage[k]);
+            }
+          }
+
+          alert("✅ Respaldo restaurado. Se recargará la app.");
+          location.reload();
+        } catch (e) {
+          alert("❌ Archivo inválido o dañado.");
+          console.error(e);
+        }
+      };
+
+      r.readAsText(file);
+    };
+
+    inp.click();
+  };
+</script>
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("search-input");
+    const btnSearch = document.getElementById("btn-search");
+    const btnFocus = document.getElementById("btn-focus-scan");
+
+    // 1) Botón "Escanear" enfoca el buscador
+    btnFocus?.addEventListener("click", () => {
+      input?.focus();
+      input?.select?.();
+    });
+
+    // 2) Si el escáner manda Enter (muy común), dispara el botón "Ir"
+    input?.addEventListener("keypress", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        btnSearch?.click();
+      }
+    });
+
+    // 3) (Opcional) enfoca el buscador al abrir la app
+    setTimeout(() => input?.focus(), 300);
+  });
 </script>
 </body>
 </html>
