@@ -180,12 +180,13 @@
                     <p class="text-[10px] text-blue-600 font-bold uppercase tracking-[0.15em] mt-1.5">Catálogo Maestro Consolidado</p>
                 </div>
             </div>
-            <div id="admin-actions" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-<button id="btn-open-sidebar"
+            <button id="btn-open-sidebar"
   class="w-full sm:w-auto justify-center bg-slate-100 text-slate-700 p-3 rounded-2xl flex items-center gap-2 border border-slate-200 hover:bg-slate-200 active:scale-95 transition-transform">
   <span class="text-[16px] font-black">☰</span>
   <span class="text-[11px] font-black uppercase hidden md:inline tracking-wider">Menú</span>
 </button>
+            <div id="admin-actions" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+
                 <button id="btn-add-manual" 
                 
                     class="w-full sm:w-auto justify-center bg-slate-900 text-white p-3 rounded-2xl flex items-center gap-2 hover:bg-slate-800 active:scale-95 transition-transform">
@@ -215,7 +216,54 @@
     </header>
 
     <main class="max-w-[1400px] mx-auto p-6">
-        <!-- Filtros Dinámicos -->
+
+
+
+      <!-- ✅ PANTALLA: INICIO / DASHBOARD -->
+<section id="screen-home" class="hidden">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-400">Acceso rápido</div>
+      <div class="mt-2 text-xl font-black text-slate-900">Nuevo Pedido</div>
+      <p class="mt-1 text-sm text-slate-600 font-semibold">Levanta pedido y envíalo por WhatsApp.</p>
+      <button id="go-pedidos-1" class="mt-4 w-full py-4 rounded-2xl bg-slate-900 text-white font-black text-[12px] uppercase">
+        Ir a Pedidos
+      </button>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-400">Administración</div>
+      <div class="mt-2 text-xl font-black text-slate-900">Catálogo / Editar</div>
+      <p class="mt-1 text-sm text-slate-600 font-semibold">Productos, precios, pasillos, importación.</p>
+      <button id="go-catalogo-1" class="mt-4 w-full py-4 rounded-2xl bg-blue-600 text-white font-black text-[12px] uppercase">
+        Ir a Catálogo
+      </button>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-400">Seguridad</div>
+      <div class="mt-2 text-xl font-black text-slate-900">Respaldos</div>
+      <p class="mt-1 text-sm text-slate-600 font-semibold">(pantalla lista, luego ponemos botones)</p>
+      <button id="go-respaldos-1" class="mt-4 w-full py-4 rounded-2xl bg-emerald-600 text-white font-black text-[12px] uppercase">
+        Abrir Respaldos
+      </button>
+    </div>
+
+    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+      <div class="text-[11px] font-black uppercase tracking-widest text-slate-400">Salida</div>
+      <div class="mt-2 text-xl font-black text-slate-900">Reporte / WhatsApp</div>
+      <p class="mt-1 text-sm text-slate-600 font-semibold">Resumen y envío.</p>
+      <button id="go-reporte-1" class="mt-4 w-full py-4 rounded-2xl bg-slate-100 text-slate-800 font-black text-[12px] uppercase border border-slate-200">
+        Abrir Reporte
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ✅ PANTALLA: CATÁLOGO (contenido actual) -->
+<section id="screen-catalogo">
+
+    <!-- Filtros Dinámicos -->
         <div id="category-list" class="flex gap-3 overflow-x-auto pb-6 no-scrollbar"></div>
 
         <!-- Productos (UNA SOLA COLUMNA) -->
@@ -224,6 +272,7 @@
                 Sincronizando el catálogo maestro completo...
             </div>
         </div>
+    </section>
     </main>
 
     <!-- Barra de Control Inferior -->
@@ -1994,6 +2043,7 @@ const LOGO_URL = "assets/logodiana.jpg";
   });
 </script>
 <script>
+  // ===== Sidebar open/close =====
   const sidebar = () => document.getElementById("sidebar");
   const overlay = () => document.getElementById("sidebar-overlay");
 
@@ -2006,10 +2056,65 @@ const LOGO_URL = "assets/logodiana.jpg";
     overlay()?.classList.add("hidden");
   }
 
+  // ===== Screens =====
+  function showScreen(name){
+    const home = document.getElementById("screen-home");
+    const catalogo = document.getElementById("screen-catalogo");
+    const admin = document.getElementById("admin-actions");
+    const orderBar = document.getElementById("order-bar");
+
+    // Oculta todo
+    home?.classList.add("hidden");
+    catalogo?.classList.add("hidden");
+    admin?.classList.add("hidden");
+    orderBar?.classList.add("hidden");
+
+    // Activo visual en sidebar
+    document.querySelectorAll(".sidebar-item").forEach(b => b.classList.remove("active"));
+    document.querySelector(`.sidebar-item[data-screen="${name}"]`)?.classList.add("active");
+
+    if (name === "home") {
+      home?.classList.remove("hidden");
+    } else if (name === "pedidos") {
+      catalogo?.classList.remove("hidden");
+      orderBar?.classList.remove("hidden");
+    } else if (name === "catalogo") {
+      catalogo?.classList.remove("hidden");
+      admin?.classList.remove("hidden");
+    } else if (name === "respaldos") {
+      // temporal: muestra catálogo + admin (después hacemos pantalla)
+      catalogo?.classList.remove("hidden");
+      admin?.classList.remove("hidden");
+    } else if (name === "reporte") {
+      // temporal: muestra pedidos
+      catalogo?.classList.remove("hidden");
+      orderBar?.classList.remove("hidden");
+    }
+
+    localStorage.setItem("ad.ui.screen", name);
+    closeSidebar();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
+    // Sidebar open/close
     document.getElementById("btn-open-sidebar")?.addEventListener("click", openSidebar);
     document.getElementById("btn-close-sidebar")?.addEventListener("click", closeSidebar);
     overlay()?.addEventListener("click", closeSidebar);
+
+    // Sidebar navigation
+    document.querySelectorAll(".sidebar-item").forEach(b => {
+      b.addEventListener("click", () => showScreen(b.dataset.screen));
+    });
+
+    // Dashboard shortcuts
+    document.getElementById("go-pedidos-1")?.addEventListener("click", () => showScreen("pedidos"));
+    document.getElementById("go-catalogo-1")?.addEventListener("click", () => showScreen("catalogo"));
+    document.getElementById("go-respaldos-1")?.addEventListener("click", () => showScreen("respaldos"));
+    document.getElementById("go-reporte-1")?.addEventListener("click", () => showScreen("reporte"));
+
+    // Pantalla inicial
+    showScreen(localStorage.getItem("ad.ui.screen") || "home");
   });
 </script>
 </body>
