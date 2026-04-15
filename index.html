@@ -386,6 +386,19 @@
           <input id="manual-price" type="number" placeholder="0.00"
             class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none">
         </div>
+          
+          <div class="mt-3">
+  <label class="text-[10px] font-black text-slate-400 uppercase ml-2 mb-1 block">Unidad / Presentación</label>
+  <select id="manual-unit"
+    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold outline-none">
+    <option value="PZA">PZA (Pieza)</option>
+    <option value="CJ">CJ (Caja)</option>
+    <option value="BULTO">BULTO</option>
+    <option value="PAQ">PAQ (Paquete)</option>
+    <option value="KG">KG</option>
+    <option value="LT">LT</option>
+  </select>
+</div>
       </div>
     </div>
 
@@ -712,6 +725,7 @@ window.openEditProductByName = function(name) {
   document.getElementById('manual-name').value = p.name || "";
   document.getElementById('manual-cat').value  = p.category || "";
   document.getElementById('manual-price').value = Number(p.price || 0);
+const unit = document.getElementById("manual-unit")?.value || "PZA";
 
   document.getElementById('modal-manual')?.classList.remove('hidden');
 };
@@ -1434,21 +1448,37 @@ if (line.includes('|')) {
 
     // Permite formato corto: NOMBRE|PRECIO
     if (parts.length === 2) {
-      unit = 'PZA';
+    unit = String(unit).trim().toUpperCase() || 'PZA';
+        unit = 'PZA';
       category = 'General';
       priceRaw = parts[1];
     }
 
     if (!name) { skipped++; return; }
+// ✅ leer campos desde la línea: NOMBRE|UNIDAD|CATEGORIA|PRECIO
+const parts = String(line).split('|').map(s => s.trim());
 
+// nombre
+const name = (parts[0] || '').trim();
+if (!name) { skipped++; return; }
+
+// unidad (si no viene, usar PZA)
+const unit = (parts[1] || 'PZA').toString().trim().toUpperCase() || 'PZA';
+
+// categoría
+const category = (parts[2] || 'Otros').toString().trim() || 'Otros';
+
+// precio raw
+const priceRaw = (parts[3] || '').toString().trim();
     // normaliza precio (coma o punto)
     const price = Number(String(priceRaw).replace(',', '.'));
     if (!Number.isFinite(price) || price <= 0) { skipped++; return; }
 
     const key = name.toLowerCase();
     const idx = products.findIndex(p => (p.name || '').toLowerCase() === key);
-
-    const item = { name, unit, category, price };
+// unidad por defecto si viene vacía
+const unitNorm = (unit || '').toString().trim().toUpperCase() || 'PZA';
+   const item = { name, unit, category, price };
 
     if (idx >= 0) { products[idx] = { ...products[idx], ...item }; updated++; }
     else { products.push(item); added++; }
