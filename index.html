@@ -1481,11 +1481,7 @@ if (line.includes('|')) {
     }
 
     if (!name) { skipped++; return; }
-// ✅ leer campos desde la línea: NOMBRE|UNIDAD|CATEGORIA|PRECIO
-const parts = String(line).split('|').map(s => s.trim());
 
-// nombre
-const name = (parts[0] || '').trim();
 if (!name) { skipped++; return; }
 
 // unidad (si no viene, usar PZA)
@@ -2172,6 +2168,30 @@ const LOGO_URL = "assets/logodiana.jpg";
     // Pantalla inicial
     showScreen(localStorage.getItem("ad.ui.screen") || "home");
   });
+</script>
+<script>
+(() => {
+  function hideSplash() {
+    const s = document.getElementById('splash');
+    if (s) s.style.display = 'none';
+  }
+
+  // Intenta ocultar splash al cargar
+  window.addEventListener('DOMContentLoaded', () => setTimeout(hideSplash, 300));
+
+  // Si hay error JS, también oculta splash y avisa
+  window.addEventListener('error', (e) => {
+    console.error('JS ERROR:', e?.message, e);
+    hideSplash();
+    alert('Error en la app: ' + (e?.message || 'desconocido') + '\n(Revisa Consola F12)');
+  });
+
+  window.addEventListener('unhandledrejection', (e) => {
+    console.error('PROMISE ERROR:', e?.reason, e);
+    hideSplash();
+    alert('Error en la app (promesa): ' + (e?.reason?.message || e?.reason || 'desconocido') + '\n(Revisa Consola F12)');
+  });
+})();
 </script>
 </body>
 </html>
