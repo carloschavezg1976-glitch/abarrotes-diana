@@ -1470,18 +1470,18 @@ if (line.includes('|')) {
 }
 
     let name = parts[0] || '';
-    let unit = parts[1] || 'PZA';
+    let importUnit = parts[1] || 'PZA';
     let category = parts[2] || 'General';
     let priceRaw = parts[3] ?? '';
 
     // Permite formato corto: NOMBRE|PRECIO
-   if (parts.length === 2) {
-  unit = 'PZA';
+  if (parts.length === 2) {
+  importUnit = 'PZA';
   category = 'General';
   priceRaw = parts[1];
 }
 name = String(name).trim();
-unit = String(unit).trim().toUpperCase() || 'PZA';
+importUnit = String(importUnit).trim().toUpperCase() || 'PZA';
 category = String(category).trim() || 'General';
     if (!name) { skipped++; return; }
 
@@ -1493,7 +1493,7 @@ category = String(category).trim() || 'General';
     const idx = products.findIndex(p => (p.name || '').toLowerCase() === key);
 
 
-   const item = { name, unit, category, price };
+  const item = { name, unit: importUnit, category, price };
 
     if (idx >= 0) { products[idx] = { ...products[idx], ...item }; updated++; }
     else { products.push(item); added++; }
