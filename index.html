@@ -1330,7 +1330,24 @@ function downloadOrderCSV() {
 window.sendWhatsApp = async function () {
   const provider = document.getElementById('provider-select')?.value || "";
   const items = currentOrder.filter(i => Number(i.qty) > 0);
+function unidadPlural(u, qty) {
+  const x = String(u || 'PZA').trim().toUpperCase();
+  const n = Number(qty) || 0;
 
+  const plural = (sing, plur) => (n === 1 ? sing : plur);
+
+  if (x === 'CJ' || x === 'CAJA') return plural('CAJA', 'CAJAS');
+  if (x === 'BUL' || x === 'BULTO') return plural('BULTO', 'BULTOS');
+  if (x === 'PAQ' || x === 'PAQUETE') return plural('PAQ', 'PAQS');
+  if (x === 'PZA' || x === 'PIEZA') return plural('PZA', 'PZAS');
+
+  // Medidas: normalmente no se pluralizan
+  if (x === 'KG' || x === 'KGS') return 'KG';
+  if (x === 'LT' || x === 'L' || x === 'LTS') return 'LT';
+  if (x === 'GR' || x === 'G') return 'GR';
+
+  return x;
+}
   // ✅ Validaciones básicas
   if (!provider) {
     alert("Selecciona un proveedor.");
@@ -1364,7 +1381,7 @@ window.sendWhatsApp = async function () {
   // ✅ Pedido corto → un solo mensaje
   if (items.length <= 20) {
     let msg = `${headerBase}\n`;
-    items.forEach(p => { msg += `• ${p.name} x ${p.qty}\n`; });
+    items.forEach(p => { msg += `• ${p.name} ${p.qty} ${unidadPlural(p.unit, p.qty)}\n`; });
     msg += footer;
 
     const url = isAndroid
@@ -1381,11 +1398,11 @@ window.sendWhatsApp = async function () {
   const part2 = items.slice(mid);
 
   let msg1 = `${headerBase}(1/2)\n\n`;
-  part1.forEach(p => { msg1 += `• ${p.name} x ${p.qty}\n`; });
+ part1.forEach(p => { msg1 += `• ${p.name} ${p.qty} ${unidadPlural(p.unit, p.qty)}\n`; });
   msg1 += `\n(Continúa en 2/2)`;
 
   let msg2 = `${headerBase}(2/2)\n\n`;
-  part2.forEach(p => { msg2 += `• ${p.name} x ${p.qty}\n`; });
+  part2.forEach(p => { msg2 += `• ${p.name} ${p.qty} ${unidadPlural(p.unit, p.qty)}\n`; });
   msg2 += footer;
 
   const url1 = isAndroid
