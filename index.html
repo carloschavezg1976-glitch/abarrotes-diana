@@ -727,7 +727,8 @@ window.openEditProductByName = function(name) {
   document.getElementById('manual-name').value = p.name || "";
   document.getElementById('manual-cat').value  = p.category || "";
   document.getElementById('manual-price').value = Number(p.price || 0);
-document.getElementById('manual-unit')?.value = String(p.unit || 'PZA').trim().toUpperCase();
+const mu = document.getElementById('manual-unit');
+if (mu) mu.value = String(p.unit || 'PZA').trim().toUpperCase();
 
   document.getElementById('modal-manual')?.classList.remove('hidden');
 };
