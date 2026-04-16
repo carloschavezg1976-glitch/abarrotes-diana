@@ -741,7 +741,7 @@ if (mu) mu.value = String(p.unit || 'PZA').trim().toUpperCase();
   const minSide = Math.min(window.screen.width, window.screen.height);
   const isTabletLike = isTouch && minSide >= 600; // umbral típico de tablet
 
-  if (!isTabletLike) return; // En laptop/desktop no hace nada
+  return; // ✅ Desactiva el candado en todos los dispositivos
 
   // 1) Bloquea la edición desde el nombre del producto
   const originalOpenEdit = window.openEditProductByName;
