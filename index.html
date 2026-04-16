@@ -1105,8 +1105,9 @@ function saveManualProduct() {
   const nameEl = document.getElementById('manual-name');
   const catEl  = document.getElementById('manual-cat');
   const priceEl = document.getElementById('manual-price');
-    const unitEl = document.getElementById('manual-unit');
-let unit = unitEl?.value || 'PZA';
+   const unitEl = document.getElementById('manual-unit');
+let manualUnit = unitEl?.value || 'PZA';
+manualUnit = String(manualUnit).trim().toUpperCase() || 'PZA';
 unit = String(unit).trim().toUpperCase() || 'PZA';
   const modal = document.getElementById('modal-manual');
 
@@ -1136,12 +1137,13 @@ unit = String(unit).trim().toUpperCase() || 'PZA';
   const idx = products.findIndex(p => (p.name || '').toLowerCase() === key);
 
   const newItem = {
-    name,
-    category,
-    price,
-    // Mantén unidad si ya existe; si es nuevo, pon PZA por defecto
-    unit: (idx >= 0 && products[idx]?.unit) ? products[idx].unit : 'PZA'
-  };
+  name,
+  category,
+  price,
+  // ✅ Usa la unidad seleccionada en el modal (ya viene precargada si estás editando)
+  unit: manualUnit
+};
+``
 
   if (idx >= 0) {
     products[idx] = { ...products[idx], ...newItem };
@@ -1473,33 +1475,24 @@ if (line.includes('|')) {
     let priceRaw = parts[3] ?? '';
 
     // Permite formato corto: NOMBRE|PRECIO
-    if (parts.length === 2) {
-    unit = String(unit).trim().toUpperCase() || 'PZA';
-        unit = 'PZA';
-      category = 'General';
-      priceRaw = parts[1];
-    }
-
+   if (parts.length === 2) {
+  unit = 'PZA';
+  category = 'General';
+  priceRaw = parts[1];
+}
+name = String(name).trim();
+unit = String(unit).trim().toUpperCase() || 'PZA';
+category = String(category).trim() || 'General';
     if (!name) { skipped++; return; }
 
-
-
-// unidad (si no viene, usar PZA)
-const unit = (parts[1] || 'PZA').toString().trim().toUpperCase() || 'PZA';
-
-// categoría
-const category = (parts[2] || 'Otros').toString().trim() || 'Otros';
-
-// precio raw
-const priceRaw = (parts[3] || '').toString().trim();
     // normaliza precio (coma o punto)
     const price = Number(String(priceRaw).replace(',', '.'));
     if (!Number.isFinite(price) || price <= 0) { skipped++; return; }
 
     const key = name.toLowerCase();
     const idx = products.findIndex(p => (p.name || '').toLowerCase() === key);
-// unidad por defecto si viene vacía
-const unitNorm = (unit || '').toString().trim().toUpperCase() || 'PZA';
+
+
    const item = { name, unit, category, price };
 
     if (idx >= 0) { products[idx] = { ...products[idx], ...item }; updated++; }
@@ -1622,7 +1615,6 @@ document.addEventListener('DOMContentLoaded', function () {
       console.warn("No se pudo usar localStorage:", e);
     }
   })();
-</script>
 
 </script>
     <script>
