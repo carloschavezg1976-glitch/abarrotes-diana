@@ -1243,19 +1243,42 @@ window.onload = () => {
       // ✅ Búsqueda “en vivo” para que el escáner encuentre productos al instante
 const searchEl = document.getElementById('search-input');
 if (searchEl && !searchEl.dataset.liveSearch) {
-  searchEl.dataset.liveSearch = "1";
+ searchEl.dataset.liveSearch = "1";
 
-  // Cada vez que cambia el texto (el escáner “teclea” aquí) filtra el catálogo
-  searchEl.addEventListener('input', () => {
-    renderCatalog(searchEl.value || "");
-  });
+// --- Escaneo: detectar “nuevo código” y limpiar automático ---
+let lastKeyTime = 0;
 
-  // Si el escáner manda ENTER al final, también filtra
-  searchEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      renderCatalog(searchEl.value || "");
+// 1) Input: útil para teclear a mano (texto), pero NO molestamos al escáner
+searchEl.addEventListener('input', () => {
+  const now = Date.now();
+  // si el escáner está tecleando muy rápido, no re-renderizamos en cada dígito
+  if (now - lastKeyTime < 120) return;
+  renderCatalog(searchEl.value || "");
+});
+
+// 2) Keydown: aquí controlamos el escaneo
+searchEl.addEventListener('keydown', (e) => {
+  const now = Date.now();
+
+  // Si llega un dígito y hubo una pausa “larga”, asumimos NUEVO escaneo:
+  // limpiamos el campo antes de que se pegue al anterior.
+  if (/^\d$/.test(e.key)) {
+    if (now - lastKeyTime > 250) {
+      searchEl.value = "";        // ✅ limpia código anterior
     }
-  });
+    lastKeyTime = now;
+    return;
+  }
+
+  // Enter = fin de escaneo (la mayoría de lectores lo mandan)
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const code = (searchEl.value || "").toString().trim().replace(/\s+/g, "");
+    renderCatalog(code);          // filtra por el código
+    searchEl.value = "";          // ✅ deja listo para el siguiente escaneo
+    lastKeyTime = 0;
+  }
+});
 }
   } catch (e) {
     console.error(e);
