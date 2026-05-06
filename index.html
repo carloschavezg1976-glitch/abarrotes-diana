@@ -799,12 +799,21 @@ if (mu) mu.value = String(p.unit || 'PZA').trim().toUpperCase();
             if (!grid) return;
             grid.innerHTML = '';
             
-            const term = search.toLowerCase().trim();
-            const selectedPasillo = document.getElementById("pasillo-select")?.value || "";
+          const term = (search || "").toString().toLowerCase().trim();
+const termBarcode = (search || "").toString().trim().replace(/\s+/g, "");
 
 const filtered = products.filter(p => {
+  const name = (p.name || "").toString().toLowerCase();
+  const category = (p.category || "").toString().toLowerCase();
+  const barcode = (p.barcode || "").toString().trim().replace(/\s+/g, "");
+
   const matchesSearch =
-    (p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term));
+    name.includes(term) ||
+    category.includes(term) ||
+    (termBarcode && barcode && barcode.includes(termBarcode));
+
+  // ... lo demás igual
+``
 
   const matchesCategory =
     (activeCategory === 'all' || p.category === activeCategory);
