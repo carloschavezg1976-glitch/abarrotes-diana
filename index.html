@@ -1243,42 +1243,87 @@ window.onload = () => {
       // ✅ Búsqueda “en vivo” para que el escáner encuentre productos al instante
 const searchEl = document.getElementById('search-input');
 if (searchEl && !searchEl.dataset.liveSearch) {
- searchEl.dataset.liveSearch = "1";
+searchEl.dataset.liveSearch = "1";
 
-// --- Escaneo: detectar “nuevo código” y limpiar automático ---
+// ✅ Escáner “a prueba de encimes”: capturamos teclas y construimos el código nosotros
+let scanBuffer = "";
+let scanTimer = null;
 let lastKeyTime = 0;
 
-// 1) Input: útil para teclear a mano (texto), pero NO molestamos al escáner
-searchEl.addEventListener('input', () => {
-  const now = Date.now();
-  // si el escáner está tecleando muy rápido, no re-renderizamos en cada dígito
-  if (now - lastKeyTime < 120) return;
-  renderCatalog(searchEl.value || "");
-});
+const digitsOnly = (v) => String(v || "").replace(/[^\d]/g, "");
 
-// 2) Keydown: aquí controlamos el escaneo
+const commitScan = () => {
+  const code = digitsOnly(scanBuffer || searchEl.value);
+  if (!code) return;
+
+  // Filtra por código o texto
+  renderCatalog(code);
+
+  // Limpia todo para el siguiente escaneo
+  scanBuffer = "";
+  searchEl.value = "";
+  lastKeyTime = 0;
+};
+
+const scheduleCommit = () => {
+  clearTimeout(scanTimer);
+  scanTimer = setTimeout(commitScan, 120); // si no llega nada en 120ms, asumimos “fin de escaneo”
+};
+
+// IMPORTANTE: usamos CAPTURE (true) para evitar que el navegador añada los dígitos al final
 searchEl.addEventListener('keydown', (e) => {
   const now = Date.now();
 
-  // Si llega un dígito y hubo una pausa “larga”, asumimos NUEVO escaneo:
-  // limpiamos el campo antes de que se pegue al anterior.
-  if (/^\d$/.test(e.key)) {
-    if (now - lastKeyTime > 250) {
-      searchEl.value = "";        // ✅ limpia código anterior
-    }
-    lastKeyTime = now;
+  // Enter = fin de escaneo (si tu escáner lo manda)
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    commitScan();
     return;
   }
 
-  // Enter = fin de escaneo (la mayoría de lectores lo mandan)
-  if (e.key === 'Enter') {
+  // Si es dígito, lo capturamos y evitamos que se “pegue” en el input
+  if (/^\d$/.test(e.key)) {
     e.preventDefault();
-    const code = (searchEl.value || "").toString().trim().replace(/\s+/g, "");
-    renderCatalog(code);          // filtra por el código
-    searchEl.value = "";          // ✅ deja listo para el siguiente escaneo
-    lastKeyTime = 0;
+
+    // Si hubo pausa, empezamos un escaneo nuevo
+    if (now - lastKeyTime > 250) {
+      scanBuffer = "";
+    }
+    lastKeyTime = now;
+
+    scanBuffer += e.key;
+    searchEl.value = scanBuffer; // mostramos el código actual (opcional)
+
+    scheduleCommit();
+    return;
+  }
+
+  // Si teclean letras a mano, dejamos el comportamiento normal y filtramos
+  // (no hacemos preventDefault)
+}, true);
+
+// Si el escáner funciona en “pegar todo de golpe” (clipboard/paste), lo soportamos también
+searchEl.addEventListener('input', () => {
+  // Si vino un pegado grande, lo tomamos como scan y lo procesamos
+  const v = digitsOnly(searchEl.value);
+  if (v.length >= 8) {
+    scanBuffer = v;
+    scheduleCommit();
+  } else {
+    // escritura normal
+    renderCatalog(searchEl.value || "");
   }
 });
+    const btnScan = document.getElementById('btn-focus-scan');
+if (btnScan && searchEl && !btnScan.dataset.scanClean) {
+  btnScan.dataset.scanClean = "1";
+  btnScan.addEventListener('click', () => {
+    searchEl.value = "";
+    searchEl.focus();
+    searchEl.select?.();
+  });
+}
+``
 }
   } catch (e) {
     console.error(e);
