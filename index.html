@@ -1240,6 +1240,23 @@ document.getElementById('manual-price')
 window.onload = () => {
   try {
     startApp();
+      // ✅ Búsqueda “en vivo” para que el escáner encuentre productos al instante
+const searchEl = document.getElementById('search-input');
+if (searchEl && !searchEl.dataset.liveSearch) {
+  searchEl.dataset.liveSearch = "1";
+
+  // Cada vez que cambia el texto (el escáner “teclea” aquí) filtra el catálogo
+  searchEl.addEventListener('input', () => {
+    renderCatalog(searchEl.value || "");
+  });
+
+  // Si el escáner manda ENTER al final, también filtra
+  searchEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      renderCatalog(searchEl.value || "");
+    }
+  });
+}
   } catch (e) {
     console.error(e);
     alert("❌ Error al iniciar: " + (e?.message || e));
