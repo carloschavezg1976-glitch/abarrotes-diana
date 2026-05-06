@@ -800,6 +800,7 @@ if (mu) mu.value = String(p.unit || 'PZA').trim().toUpperCase();
             grid.innerHTML = '';
             
           const term = (search || "").toString().toLowerCase().trim();
+            const selectedPasillo = document.getElementById("pasillo-select")?.value || "";
 const termBarcode = (search || "").toString().trim().replace(/\s+/g, "");
 
 const filtered = products.filter(p => {
@@ -813,7 +814,6 @@ const filtered = products.filter(p => {
     (termBarcode && barcode && barcode.includes(termBarcode));
 
   // ... lo demás igual
-``
 
   const matchesCategory =
     (activeCategory === 'all' || p.category === activeCategory);
