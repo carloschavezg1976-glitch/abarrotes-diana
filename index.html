@@ -799,7 +799,10 @@ window.__scanHoldTerm = "";
             const grid = document.getElementById('product-grid');
             if (!grid) return;
             grid.innerHTML = '';
-            
+            // ✅ HOLD: si alguien intenta renderCatalog("") después de escanear, mantenemos el último código
+if (window.__scanHold && (!search || String(search).trim() === "")) {
+  search = window.__scanHoldTerm || "";
+}
           const term = (search || "").toString().toLowerCase().trim();
             const selectedPasillo = document.getElementById("pasillo-select")?.value || "";
 const termBarcode = (search || "").toString().trim().replace(/\s+/g, "");
@@ -1040,10 +1043,7 @@ if (pas) {
     document.getElementById('btn-search')
   ?.addEventListener('click', applySearch);
 
-document.getElementById('search-input')
-  ?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') applySearch();
-  });
+
   // ✅ Logo persistente
   const logoTrigger = document.getElementById('logo-trigger');
   const logoInput = document.getElementById('logo-input');
@@ -1253,7 +1253,8 @@ window.onload = () => {
       const commitScan = () => {
         const code = digitsOnly(scanBuffer || searchEl.value);
         if (!code) return;
-
+window.__scanHold = true;
+window.__scanHoldTerm = code;
         // ✅ muestra el producto filtrado
         renderCatalog(code);
 
@@ -1317,7 +1318,9 @@ window.onload = () => {
       if (btnScan && !btnScan.dataset.scanClean) {
         btnScan.dataset.scanClean = "1";
         btnScan.addEventListener('click', () => {
-          scanBuffer = "";
+        window.__scanHold = false;
+window.__scanHoldTerm = "";
+            scanBuffer = "";
           searchEl.value = "";
           scanReady = false;
           searchEl.focus();
