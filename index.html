@@ -792,7 +792,9 @@ if (mu) mu.value = String(p.unit || 'PZA').trim().toUpperCase();
 })();
     
  
-
+// ✅ Mantener filtro tras escaneo (evita volver a catálogo general)
+window.__scanHold = false;
+window.__scanHoldTerm = "";
         function renderCatalog(search = "") {
             const grid = document.getElementById('product-grid');
             if (!grid) return;
